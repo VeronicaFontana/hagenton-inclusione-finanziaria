@@ -118,12 +118,18 @@ const arancio = coloreCSS('--arancio');
 
 **Conseguenza per il toggle tema chiaro/scuro già presente nella pagina** (`toggleTema()`): cambiare `data-theme` su `<html>` aggiorna automaticamente tutti gli elementi DOM/CSS, ma **non** i canvas Chart.js già disegnati, perché i colori sono stati "congelati" come stringhe al momento della creazione. Se un grafico deve restare leggibile passando da tema chiaro a scuro, `toggleTema()` deve anche ricalcolare i colori dei dataset con `getComputedStyle` e chiamare `chart.update()` — vedi l'esempio in [reference-esempio.html](reference-esempio.html).
 
-## 7. Accessibilità
+## 7. Il canvas deve già essere nel DOM prima di chiamare `new Chart(...)`
+
+In questo progetto ogni step del simulatore viene costruito come stringa HTML dentro `wrap.innerHTML += \`...\`` e solo dopo `wrap` viene inserito nel DOM con `main.appendChild(wrap)`. Se si chiama `new Chart(ctx, ...)` **dentro** la funzione che costruisce quella stringa (es. dentro `renderRiepilogo`), il canvas non esiste ancora nel documento e `document.getElementById('chartRata')` restituisce `null` — silenziosamente, senza errore visibile finché non si prova a leggerne il contesto.
+
+Il disegno del grafico va quindi fatto **dopo** che il markup è stato agganciato al DOM, non dentro la funzione `renderXxx`. In questo progetto il punto giusto è la sezione di inizializzazione centralizzata post-DOM dentro `render()` (dopo `main.appendChild(wrap)`), lo stesso posto dove vengono agganciati i listener `input` degli altri step.
+
+## 8. Accessibilità
 
 Il `<canvas>` non ha contenuto testuale nativo per gli screen reader. Best practice minima:
 - dare al canvas un `role="img"` e un `aria-label` descrittivo che riassuma il grafico in una frase (es. `aria-label="Composizione della rata: capitale e interessi per anno"`), aggiornato quando cambiano i dati;
 - non affidarsi al solo colore per distinguere le serie (già garantito qui dalle etichette in `datasets[].label`, che Chart.js mostra nella legenda di default).
 
-## 8. Quando NON usare Chart.js in questo progetto
+## 9. Quando NON usare Chart.js in questo progetto
 
 Per micro-visualizzazioni molto semplici e statiche (una singola barra di progresso, il meter di sostenibilità, un arco di gauge) l'SVG/CSS fatto a mano resta preferibile: sono poche righe, zero dipendenze esterne, e non serve interattività/animazione della libreria. Chart.js conviene quando il grafico ha più serie di dati, assi, tooltip al passaggio del mouse, o deve aggiornarsi frequentemente in risposta a più input — è il caso del grafico capitale/interessi e del grafico inflazione, meno quello del gauge a singolo valore.

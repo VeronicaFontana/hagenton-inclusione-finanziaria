@@ -76,6 +76,25 @@ Rimborso, totale o parziale, del debito residuo prima della scadenza naturale. E
 - l'estinzione anticipata riduce gli interessi futuri (che si calcolano sul debito residuo), ma **non restituisce** interessi già pagati
 - eventuali penali di estinzione anticipata (quando previste contrattualmente) sono un costo separato, non vanno confuse con gli interessi
 
+## 6. Durata massima in un mutuo cointestato
+
+In un mutuo cointestato, la maggior parte delle banche calcola la durata massima sull'**intestatario più anziano**, non sulla media o sul più giovane: è il vincolo più restrittivo per l'intera pratica, perché la banca deve poter contare sulla capacità di rimborso di entrambi per tutta la durata del prestito. Il codice che calcola l'età vincolante per la durata massima deve quindi prendere il `max()` delle età degli intestatari, mai una media.
+
+## 7. Punteggio di salute del mutuo (modello di questo simulatore)
+
+Il simulatore include un punteggio 0-100 che **non è l'algoritmo reale di nessuna banca**, ma un modello educativo semplificato che combina quattro pilastri, ciascuno con un punteggio massimo:
+
+- **LTV** (0-25 pt): più basso è il rapporto prestito/valore, più alto il punteggio.
+- **Rata rispetto al reddito** (0-30 pt): usa la soglia del 30-35% descritta altrove in questa skill; se il reddito non è stato indicato dall'utente, il pilastro riceve un punteggio neutro (15/30), non zero — un dato mancante non va penalizzato come se fosse un dato negativo.
+- **Margine sull'età limite** (0-25 pt): quanti anni restano tra la durata scelta e il limite di 80 anni sull'intestatario vincolante (vedi punto 6); se l'età non è nota, punteggio neutro (15/25) per lo stesso motivo di cui sopra.
+- **Tenuta a un rialzo dei tassi** (0-20 pt): uno stress test che simula un aumento dei tassi e verifica quanto margine resterebbe sulla rata; se il mutuo è a tasso variabile lo stress test vale di più (fino a 2 punti aggiuntivi), perché l'esposizione al rischio è reale e non ipotetica.
+
+Se si modifica questo modello, mantenere la regola "dato mancante → punteggio neutro, non zero" per i pilastri 2 e 3: penalizzare un dato mancante come se fosse un dato negativo produrrebbe un punteggio ingannevolmente basso per chi ha semplicemente scelto di non condividere il reddito.
+
+## 8. Aggregare il piano di ammortamento per periodi (grafici, tabelle di riepilogo)
+
+Quando si riassume il piano di ammortamento in pochi periodi (es. per un grafico a barre o una tabella "rata per anno"), il totale capitale/interessi di ciascun periodo va calcolato **eseguendo lo stesso ciclo mese-per-mese** della formula al punto 1 (stesso `debito_residuo`, stessa rata), non con un'approssimazione o un'interpolazione lineare tra inizio e fine periodo. Interpolare produce numeri plausibili ma sbagliati, perché la curva capitale/interessi non è lineare (vedi punto 1: interessi decrescenti, capitale crescente in modo non lineare). La media mensile di un periodo (utile per mostrare "quanto capitale/interessi in media al mese in questo periodo") si ottiene dividendo il totale del periodo per il numero di mesi del periodo, mai da una singola rata isolata.
+
 ## Esempi numerici di verifica
 
 Caso base per test di regressione (usa convenzione lineare `TAN/12`):
