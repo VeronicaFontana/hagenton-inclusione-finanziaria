@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capire il Mutuo — Presentazione</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blu:   #1a2744;
+  --blum:  #243356;
+  --verde: #4a9b7f;
+  --vl:    #e8f5f0;
+  --aro:   #e8834a;
+  --al:    #fdf2ea;
+  --gry:   #f5f6f8;
+  --gm:    #dde2ea;
+  --sft:   #5a6478;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+  background: #0e1830;
+}
+
+/* ── DECK ────────────────────────────────────── */
+.deck {
+  position: relative;
+  width: 100%; height: 100vh;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.42s ease, transform 0.42s ease;
+}
+.slide.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+
+/* ── NAV BAR ─────────────────────────────────── */
+.nav {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(8, 16, 38, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 7px 14px;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.09);
+}
+
+.nav-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: none;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.75);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.nav-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.12);
+  color: white;
+}
+.nav-btn:disabled { opacity: 0.28; cursor: default; }
+
+.dots { display: flex; gap: 6px; align-items: center; }
+
+.dot {
+  height: 7px; width: 7px;
+  border-radius: 4px;
+  border: none;
+  background: rgba(255,255,255,0.22);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+.dot.active { background: var(--verde); width: 22px; }
+
+.counter {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.35);
+  min-width: 24px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* ════════════════════════════════════════════════
+   SLIDE 1 — COVER
+════════════════════════════════════════════════ */
+#s1 {
+  background: var(--blu);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 40px;
+  gap: 0;
+}
+
+.s1-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--verde);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+
+/* house SVG */
+.s1-house {
+  width: 148px;
+  height: 112px;
+  margin-bottom: 26px;
+}
+
+.s1-h1 {
+  font-size: clamp(38px, 6vw, 70px);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -2.5px;
+  line-height: 1.04;
+  margin-bottom: 14px;
+}
+
+.s1-sub {
+  font-size: clamp(13px, 1.7vw, 16px);
+  color: rgba(255,255,255,0.46);
+  font-weight: 300;
+  max-width: 460px;
+  line-height: 1.7;
+  margin-bottom: 36px;
+}
+
+.s1-pills {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.pill {
+  padding: 7px 16px;
+  border-radius: 100px;
+  border: 1.5px solid rgba(255,255,255,0.13);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.58);
+  white-space: nowrap;
+}
+
+/* ════════════════════════════════════════════════
+   SLIDE 2 — COS'È UN MUTUO
+════════════════════════════════════════════════ */
+#s2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* left column — navy */
+.s2-l {
+  background: var(--blu);
+  padding: 44px 42px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.wm {
+  position: absolute;
+  right: -10px; bottom: -40px;
+  font-size: 200px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.035);
+  user-select: none;
+  pointer-events: none;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--verde);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.sh {
+  font-size: clamp(24px, 2.8vw, 36px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin-bottom: 18px;
+}
+
+.sh-w { color: #fff; }
+.sh-d { color: var(--blu); }
+
+.s2-def {
+  font-size: 13.5px;
+  color: rgba(255,255,255,0.52);
+  line-height: 1.75;
+  font-weight: 400;
+  max-width: 370px;
+}
+.s2-def strong { color: #7de8c0; font-weight: 600; }
+
+/* flow diagram */
+.flow {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.f-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.f-ico {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: rgba(74,155,127,0.15);
+  border: 1.5px solid rgba(74,155,127,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.f-name { font-size: 12px; font-weight: 700; color: #fff; }
+.f-sub  { font-size: 10px; color: rgba(255,255,255,0.38); margin-top: 1px; }
+
+.f-line {
+  width: 1.5px;
+  height: 16px;
+  background: rgba(74,155,127,0.3);
+  margin-left: 19px;
+  flex-shrink: 0;
+}
+
+/* right column — light */
+.s2-r {
+  background: var(--gry);
+  padding: 44px 42px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+}
+
+.ccard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px 20px;
+  border: 1.5px solid var(--gm);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.cnum {
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 42px;
+}
+.ccard:nth-child(1) .cnum { color: var(--verde); }
+.ccard:nth-child(2) .cnum { color: var(--aro); }
+.ccard:nth-child(3) .cnum { color: #7a5fc4; }
+
+.cname { font-size: 13.5px; font-weight: 700; color: var(--blu); margin-bottom: 4px; }
+.cdesc { font-size: 11.5px; color: var(--sft); line-height: 1.6; }
+
+/* ════════════════════════════════════════════════
+   SLIDE 3 — PERCORSO IN 7 PASSI
+════════════════════════════════════════════════ */
+#s3 {
+  background: var(--blum);
+  padding: 44px 46px 76px;
+  display: flex;
+  flex-direction: column;
+}
+
+.s3-hd { margin-bottom: 36px; }
+
+.s3-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 300;
+  max-width: 520px;
+  line-height: 1.6;
+  margin-top: 6px;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  position: relative;
+  flex: 1;
+  align-content: flex-start;
+}
+
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: calc(100% / 14);
+  right: calc(100% / 14);
+  height: 1.5px;
+  background: linear-gradient(90deg, var(--verde) 0%, rgba(74,155,127,0.15) 100%);
+}
+
+.snode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 5px;
+  z-index: 1;
+  position: relative;
+}
+
+.sndot {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--verde);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 6px rgba(74,155,127,0.12);
+}
+
+.sntitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.35;
+  margin-bottom: 5px;
+}
+
+.sndesc {
+  font-size: 9.5px;
+  color: rgba(255,255,255,0.38);
+  line-height: 1.5;
+}
+
+.s3-note {
+  margin-top: auto;
+  background: rgba(74,155,127,0.1);
+  border: 1px solid rgba(74,155,127,0.22);
+  border-radius: 10px;
+  padding: 13px 18px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.58);
+  max-width: 580px;
+}
+
+/* ════════════════════════════════════════════════
+   SLIDE 4 — FUNZIONALITÀ
+════════════════════════════════════════════════ */
+#s4 {
+  background: #fff;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+}
+
+.s4-hd {
+  padding: 28px 44px 20px;
+  border-bottom: 1.5px solid var(--gm);
+}
+
+.s4-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.fpanel {
+  padding: 26px 34px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1.5px solid var(--gm);
+  border-bottom: 1.5px solid var(--gm);
+}
+.fpanel:nth-child(2n)   { border-right: none; }
+.fpanel:nth-child(n+3)  { border-bottom: none; }
+
+.fpanel:nth-child(1) { background: #fff; }
+.fpanel:nth-child(2) { background: var(--vl); }
+.fpanel:nth-child(3) { background: var(--al); }
+.fpanel:nth-child(4) { background: #f0e8f5; }
+
+.ficon { font-size: 26px; margin-bottom: 10px; line-height: 1; }
+
+.fname {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--blu);
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+}
+
+.fpts {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fpts li {
+  font-size: 12px;
+  color: var(--sft);
+  display: flex;
+  gap: 8px;
+  line-height: 1.55;
+  align-items: flex-start;
+}
+
+.fpts li::before {
+  content: '·';
+  color: var(--verde);
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════════════
+   SLIDE 5 — TIMELINE + CTA
+════════════════════════════════════════════════ */
+#s5 {
+  background: var(--blu);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+}
+
+.s5-l {
+  padding: 38px 42px 76px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid rgba(255,255,255,0.07);
+}
+
+.s5-r {
+  background: var(--blum);
+  padding: 38px 42px 76px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.tl { display: flex; flex-direction: column; margin-top: 22px; }
+
+.tl-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.tl-spine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.tl-dot {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--verde);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.tl-vline {
+  width: 1.5px;
+  height: 20px;
+  background: rgba(74,155,127,0.28);
+  margin: 2px 0;
+}
+
+.tl-txt { padding-top: 4px; }
+.tl-t { font-size: 12.5px; font-weight: 700; color: #fff; margin-bottom: 1px; }
+.tl-d { font-size: 10.5px; color: rgba(255,255,255,0.4); line-height: 1.5; }
+
+/* benefits */
+.blist {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.brow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.bico { font-size: 16px; width: 22px; flex-shrink: 0; text-align: center; }
+
+.btxt {
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.62);
+  line-height: 1.5;
+}
+
+.cta {
+  margin-top: 26px;
+  display: inline-block;
+  padding: 12px 24px;
+  background: var(--verde);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.2px;
+  transition: opacity 0.2s, transform 0.15s;
+  align-self: flex-start;
+}
+.cta:hover { opacity: 0.85; transform: translateY(-1px); }
+
+.legal {
+  margin-top: 14px;
+  font-size: 9.5px;
+  color: rgba(255,255,255,0.22);
+  line-height: 1.55;
+  max-width: 320px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- ── SLIDE 1 — COVER ── -->
+  <div class="slide active" id="s1">
+    <div class="s1-tag">Guida educativa al mutuo</div>
+
+    <svg class="s1-house" viewBox="0 0 148 112" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="74,6 144,54 4,54" stroke="#4a9b7f" stroke-width="2.4" stroke-linejoin="round" fill="rgba(74,155,127,0.06)"/>
+      <rect x="24" y="54" width="100" height="52" stroke="#4a9b7f" stroke-width="2.4" stroke-linejoin="round" fill="rgba(74,155,127,0.04)"/>
+      <rect x="62" y="83" width="24" height="23" stroke="#4a9b7f" stroke-width="2" stroke-linejoin="round" fill="rgba(74,155,127,0.1)"/>
+      <rect x="34"  y="66" width="22" height="17" stroke="#4a9b7f" stroke-width="1.8" stroke-linejoin="round" fill="rgba(255,255,255,0.06)"/>
+      <rect x="92"  y="66" width="22" height="17" stroke="#4a9b7f" stroke-width="1.8" stroke-linejoin="round" fill="rgba(255,255,255,0.06)"/>
+      <rect x="102" y="28" width="14" height="28" stroke="#4a9b7f" stroke-width="1.8" stroke-linejoin="round" fill="rgba(74,155,127,0.08)"/>
+      <line x1="38" y1="66" x2="38" y2="83" stroke="rgba(74,155,127,0.3)" stroke-width="1"/>
+      <line x1="94" y1="66" x2="94" y2="83" stroke="rgba(74,155,127,0.3)" stroke-width="1"/>
+    </svg>
+
+    <h1 class="s1-h1">Capire il Mutuo</h1>
+    <p class="s1-sub">Lo strumento interattivo che spiega come funziona un mutuo, passo dopo passo, senza gergo tecnico.</p>
+
+    <div class="s1-pills">
+      <span class="pill">🏠 Simulatore personalizzato</span>
+      <span class="pill">📊 Calcoli in tempo reale</span>
+      <span class="pill">🎓 Ogni termine spiegato</span>
+    </div>
+  </div>
+
+
+  <!-- ── SLIDE 3 — PERCORSO ── -->
+  <div class="slide" id="s3">
+    <div class="s3-hd">
+      <div class="eyebrow">Come funziona il tool</div>
+      <h2 class="sh sh-w">Il percorso guidato in 7 passi</h2>
+      <p class="s3-sub">Lo strumento ti guida attraverso domande semplici. Ad ogni risposta impari un concetto nuovo sul mutuo.</p>
+    </div>
+
+    <div class="steps">
+      <div class="snode">
+        <div class="sndot">1</div>
+        <div class="sntitle">Valore della casa</div>
+        <div class="sndesc">Prezzo, spese notarili, imposte e agenzia</div>
+      </div>
+      <div class="snode">
+        <div class="sndot">2</div>
+        <div class="sntitle">Acconto e LTV</div>
+        <div class="sndesc">Quota tua vs quota della banca</div>
+      </div>
+      <div class="snode">
+        <div class="sndot">3</div>
+        <div class="sntitle">Intestatari</div>
+        <div class="sndesc">Solo o in coppia? Reddito e rimborso</div>
+      </div>
+      <div class="snode">
+        <div class="sndot">4</div>
+        <div class="sntitle">Durata del mutuo</div>
+        <div class="sndesc">Anni: bilanciare rata e interessi</div>
+      </div>
+      <div class="snode">
+        <div class="sndot">5</div>
+        <div class="sntitle">Tipo di tasso</div>
+        <div class="sndesc">Fisso, variabile o misto</div>
+      </div>
+      <div class="snode">
+        <div class="sndot">6</div>
+        <div class="sntitle">Costi iniziali</div>
+        <div class="sndesc">Istruttoria, perizia, notaio</div>
+      </div>
+      <div class="snode">
+        <div class="sndot">7</div>
+        <div class="sntitle">Riepilogo</div>
+        <div class="sndesc">Rata, costo totale, confronto e scenari</div>
+      </div>
+    </div>
+
+    <div class="s3-note">
+      ✅&nbsp; Ogni passo spiega il concetto in parole semplici e aggiorna i calcoli in tempo reale.
+    </div>
+  </div>
+
+
+  <!-- ── SLIDE 4 — FUNZIONALITÀ ── -->
+  <div class="slide" id="s4">
+    <div class="s4-hd">
+      <div class="eyebrow" style="color:var(--verde)">Funzionalità avanzate</div>
+      <h2 class="sh sh-d">Cosa impari con il tool</h2>
+    </div>
+    <div class="s4-grid">
+      <div class="fpanel">
+        <div class="ficon">📊</div>
+        <div class="fname">Simulatore della rata</div>
+        <ul class="fpts">
+          <li>Calcola la rata mensile in tempo reale</li>
+          <li>Grafico capitale vs interessi anno per anno</li>
+          <li>Tabella di ammortamento completa</li>
+        </ul>
+      </div>
+      <div class="fpanel">
+        <div class="ficon">⚖️</div>
+        <div class="fname">Confronto Fisso vs Variabile</div>
+        <ul class="fpts">
+          <li>Affianca i due tassi nelle stesse condizioni</li>
+          <li>Evidenzia rata, costo totale e flessibilità</li>
+          <li>Un verdetto finale con la scelta consigliata</li>
+        </ul>
+      </div>
+      <div class="fpanel">
+        <div class="ficon">❤️</div>
+        <div class="fname">Punteggio di salute finanziaria</div>
+        <ul class="fpts">
+          <li>Rapporto rata / reddito (soglia consigliata 30–35%)</li>
+          <li>Valuta LTV, durata e sostenibilità complessiva</li>
+          <li>Voto da 0 a 100 con suggerimenti pratici</li>
+        </ul>
+      </div>
+      <div class="fpanel">
+        <div class="ficon">🔮</div>
+        <div class="fname">Scenari di vita</div>
+        <ul class="fpts">
+          <li>Cosa succede se perdo il lavoro?</li>
+          <li>Cosa succede se i tassi salgono del 2%?</li>
+          <li>Opzioni: rinegoziazione, moratoria, surroga</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ── SLIDE 5 — TIMELINE + CTA ── -->
+  <div class="slide" id="s5">
+    <div class="s5-l">
+      <div class="eyebrow">Il viaggio verso casa tua</div>
+      <h2 class="sh sh-w">Dalla prima domanda<br>alle chiavi in mano</h2>
+      <div class="tl">
+        <div class="tl-row">
+          <div class="tl-spine"><div class="tl-dot">1</div><div class="tl-vline"></div></div>
+          <div class="tl-txt"><div class="tl-t">Usi il tool</div><div class="tl-d">Impari i concetti base e calcoli la tua rata indicativa</div></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-spine"><div class="tl-dot">2</div><div class="tl-vline"></div></div>
+          <div class="tl-txt"><div class="tl-t">Vai in banca preparato</div><div class="tl-d">Conosci LTV, tasso e costi: fai le domande giuste</div></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-spine"><div class="tl-dot">3</div><div class="tl-vline"></div></div>
+          <div class="tl-txt"><div class="tl-t">Richiesta e istruttoria</div><div class="tl-d">La banca valuta il reddito e ordina la perizia dell'immobile</div></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-spine"><div class="tl-dot">4</div><div class="tl-vline"></div></div>
+          <div class="tl-txt"><div class="tl-t">Offerta vincolante (PIES)</div><div class="tl-d">7 giorni per riflettere senza impegnarti</div></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-spine"><div class="tl-dot">5</div><div class="tl-vline"></div></div>
+          <div class="tl-txt"><div class="tl-t">Rogito notarile</div><div class="tl-d">La banca eroga il mutuo. Firmi e ritiri le chiavi</div></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-spine"><div class="tl-dot">6</div></div>
+          <div class="tl-txt"><div class="tl-t">Prima rata</div><div class="tl-d">Il mese dopo il rogito inizia il rimborso del mutuo</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="s5-r">
+      <div class="eyebrow">Perché usarlo</div>
+      <h2 class="sh sh-w">Lo strumento pensato<br>per chi parte da zero</h2>
+      <div class="blist">
+        <div class="brow"><div class="bico">🎓</div><div class="btxt">Spiega ogni termine senza dare nulla per scontato</div></div>
+        <div class="brow"><div class="bico">🌍</div><div class="btxt">Disponibile in italiano, inglese e tedesco</div></div>
+        <div class="brow"><div class="bico">♿</div><div class="btxt">Modalità testo grande per l'accessibilità</div></div>
+        <div class="brow"><div class="bico">🌙</div><div class="btxt">Tema chiaro e tema scuro selezionabili</div></div>
+        <div class="brow"><div class="bico">📱</div><div class="btxt">Ottimizzato per mobile e desktop</div></div>
+        <div class="brow"><div class="bico">🔒</div><div class="btxt">Nessun dato salvato o condiviso</div></div>
+      </div>
+      <button class="cta" id="startApp" type="button">Inizia a esplorare →</button>
+      <p class="legal">Solo educativo · I calcoli sono indicativi · Non costituisce consulenza finanziaria. Prima di sottoscrivere un mutuo, rivolgiti sempre a un consulente abilitato.</p>
+    </div>
+  </div>
+
+</div><!-- .deck -->
+
+
+<!-- ── NAVIGATION ── -->
+<nav class="nav">
+  <button class="nav-btn" id="prev" title="Precedente">&#8592;</button>
+  <div class="dots" id="dots"></div>
+  <button class="nav-btn" id="next" title="Successivo">&#8594;</button>
+  <span class="counter" id="counter">1 / 5</span>
+</nav>
+
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const N = slides.length;
+  let cur = 0;
+
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const dotsEl  = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+
+  // build dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot';
+    d.title = 'Slide ' + (i + 1);
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    dotsEl.children[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(N - 1, n));
+    slides[cur].classList.add('active');
+    dotsEl.children[cur].classList.add('active');
+    counter.textContent = (cur + 1) + ' / ' + N;
+    prevBtn.disabled = cur === 0;
+    nextBtn.disabled = cur === N - 1;
+  }
+
+  prevBtn.addEventListener('click', () => goTo(cur - 1));
+  nextBtn.addEventListener('click', () => goTo(cur + 1));
+
+  // keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); goTo(cur + 1); }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')  { e.preventDefault(); goTo(cur - 1); }
+  });
+
+  // touch swipe
+  let touchX = 0;
+  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 48) goTo(cur + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+
+  goTo(0);
+
+  // avvia l'applicazione del simulatore al click sul pulsante finale
+  document.getElementById('startApp').addEventListener('click', () => {
+    window.location.href = 'app/mutuo_educativo.html';
+  });
+</script>
+</body>
+</html>
