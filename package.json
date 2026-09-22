@@ -1,0 +1,12 @@
+{
+  "name": "hagenton-inclusione-finanziaria",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Simulatore educativo di mutuo per l'inclusione finanziaria — pagina HTML statica, nessun build step.",
+  "scripts": {
+    "start": "http-server app -p 8080 -o /mutuo_educativo.html -c-1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
