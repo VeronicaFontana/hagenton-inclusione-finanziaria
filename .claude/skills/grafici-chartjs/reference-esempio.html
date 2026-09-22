@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<!--
+  Esempio minimo e autosufficiente: grafico a barre impilate (capitale vs
+  interessi per anno) con Chart.js, colori letti dalle CSS custom property
+  del progetto e ridisegno automatico al cambio di tema chiaro/scuro.
+
+  Non è collegato al simulatore reale: è materiale di riferimento per la
+  skill grafici-chartjs, pensato per essere aperto da solo nel browser.
+-->
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Esempio Chart.js — capitale vs interessi</title>
+<style>
+  :root {
+    --blu: #1a2744;
+    --arancio: #e8834a;
+    --grigio: #f5f6f8;
+    --testo: #1a2744;
+  }
+  html[data-theme="dark"] {
+    --blu: #6f9bff;
+    --arancio: #f5a872;
+    --grigio: #10162a;
+    --testo: #e7eaf3;
+  }
+  body {
+    font-family: sans-serif;
+    background: var(--grigio);
+    color: var(--testo);
+    padding: 24px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .chart-wrap {
+    position: relative;
+    height: 260px;
+    max-width: 640px;
+    margin-top: 16px;
+  }
+  button { cursor: pointer; }
+</style>
+</head>
+<body>
+
+<button onclick="toggleTemaDemo()">Cambia tema chiaro/scuro</button>
+
+<div class="chart-wrap">
+  <canvas id="chartCapitaleInteressi" role="img" aria-label="Composizione della rata: capitale e interessi per anno"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Dati di esempio: capitale e interessi rimborsati per anno su un mutuo
+  const anni = Array.from({ length: 20 }, (_, i) => `Anno ${i + 1}`);
+  const capitalePerAnno = anni.map((_, i) => 3000 + i * 250);
+  const interessiPerAnno = anni.map((_, i) => 3500 - i * 150);
+
+  function coloreCSS(nomeVar) {
+    return getComputedStyle(document.documentElement).getPropertyValue(nomeVar).trim();
+  }
+
+  let chart;
+
+  function creaGrafico() {
+    const ctx = document.getElementById('chartCapitaleInteressi').getContext('2d');
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: anni,
+        datasets: [
+          { label: 'Capitale', data: capitalePerAnno, backgroundColor: coloreCSS('--blu'), borderRadius: 4 },
+          { label: 'Interessi', data: interessiPerAnno, backgroundColor: coloreCSS('--arancio'), borderRadius: 4 },
+        ]
+      },
+      options: {
+        maintainAspectRatio: false,
+        scales: {
+          x: { stacked: true },
+          y: { stacked: true, beginAtZero: true }
+        }
+      }
+    });
+  }
+
+  // Il canvas non ascolta da solo i cambi di CSS custom property: quando il
+  // tema cambia, bisogna rileggere i colori con getComputedStyle e
+  // aggiornare esplicitamente i dataset, poi chart.update().
+  function aggiornaColoriGrafico() {
+    if (!chart) return;
+    chart.data.datasets[0].backgroundColor = coloreCSS('--blu');
+    chart.data.datasets[1].backgroundColor = coloreCSS('--arancio');
+    chart.update();
+  }
+
+  function toggleTemaDemo() {
+    const scuro = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (scuro) {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    aggiornaColoriGrafico();
+  }
+
+  creaGrafico();
+</script>
+</body>
+</html>
