@@ -1695,6 +1695,24 @@ function updateEtaPreview() {
           durataMax < 20 ? 'Hai una buona flessibilità, ma con qualche vincolo sulla durata.' :
           '✅ Hai piena flessibilità sulla durata del mutuo.'}
       </div>
+    </div>
+    ${avvisoEtaConsap(eta, 'Hai')}`;
+}
+
+// Avviso non bloccante: la categoria "under 36" della Garanzia Statale prima casa
+// (Consap) di solito richiede un'età sotto i 36 anni. Non impedisce di proseguire:
+// segnala solo che potrebbe servire rientrare in un'altra categoria prevista dalla
+// normativa (es. nuclei numerosi, genitori soli con figli minori).
+function avvisoEtaConsap(eta, soggetto) {
+  if (!state.garanzia_consap || !eta || eta <= 36) return '';
+  return `
+    <div class="warning">
+      <div class="warning-label">⚠️ Verifica i requisiti della Garanzia Statale</div>
+      <div class="warning-text">
+        ${soggetto} più di 36 anni: la categoria "under 36" della Garanzia Statale prima casa (Consap) di solito richiede un'età inferiore a questa soglia.
+        Potresti comunque rientrare in un'altra categoria prevista dalla normativa (es. nuclei familiari numerosi, genitori soli con figli minori).
+        Verifica i requisiti aggiornati con la tua banca o su consap.it prima di fare affidamento su questa opzione.
+      </div>
     </div>`;
 }
 
@@ -1739,7 +1757,8 @@ function updateCointestazionePreview() {
   const eta2 = parseInt(document.getElementById('inp_eta2')?.value);
   const box = document.getElementById('preview_cointestazione');
   if (!box) return;
-  if (!eta2 || !state.eta) { box.innerHTML = ''; return; }
+  const avvisoConsap = avvisoEtaConsap(eta2, 'Il cointestatario ha');
+  if (!eta2 || !state.eta) { box.innerHTML = avvisoConsap; return; }
   const ETA_MAX = 80;
   const etaVincolante = Math.max(state.eta, eta2);
   const durataMax = ETA_MAX - etaVincolante;
@@ -1752,7 +1771,8 @@ function updateCointestazionePreview() {
         La durata massima del mutuo scende quindi a <strong>${durataMax} anni</strong>
         (rispetto a ${80 - state.eta} anni se fossi da solo).
       </div>
-    </div>`;
+    </div>
+    ${avvisoConsap}`;
 }
 
 function salvaAnagrafica() {
