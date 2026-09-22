@@ -1,0 +1,3011 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capire il Mutuo</title>
+<script>
+  // Applica subito il tema salvato (prima del rendering) per evitare un lampo del tema sbagliato
+  (function() {
+    try {
+      const salvato = localStorage.getItem('tema');
+      const scuro = salvato ? salvato === 'scuro' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (scuro) document.documentElement.setAttribute('data-theme', 'dark');
+    } catch (e) {}
+  })();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blu: #1a2744;
+    --blu-testo: #1a2744;
+    --blu-mid: #243356;
+    --verde: #4a9b7f;
+    --verde-light: #e8f5f0;
+    --verde-label: #357057;
+    --verde-btn: #357057;
+    --arancio: #e8834a;
+    --arancio-light: #fdf2ea;
+    --arancio-label: #a55725;
+    --blu-verdict: #2f5f8f;
+    --rosso-light: #fdecea;
+    --grigio: #f5f6f8;
+    --grigio-mid: #e2e5ea;
+    --testo: #1a2744;
+    --testo-soft: #5a6478;
+    --bianco: #ffffff;
+  }
+
+  /* TEMA SCURO */
+  html[data-theme="dark"] {
+    --blu-testo: #a9c2f0;
+    --grigio: #10162a;
+    --grigio-mid: #2c3557;
+    --testo: #e7eaf3;
+    --testo-soft: #9aa3bd;
+    --bianco: #1a2140;
+    /* Sfondi tenui (concept/warning box) scuriti: in chiaro restano chiari,
+       ma qui il testo sopra diventa chiaro (#8fd9b8 ecc.), quindi anche lo sfondo deve scurirsi
+       per mantenere il contrasto — altrimenti è testo chiaro su sfondo chiaro. */
+    --verde-light: #16332a;
+    --arancio-light: #3a2415;
+    --verde-label: #8fd9b8;
+    --arancio-label: #f0bb8c;
+    --blu-verdict: #8fb6ea;
+    --rosso-light: #3a1512;
+  }
+  html[data-theme="dark"] .story-scene {
+    background: linear-gradient(180deg, #1c2c42 0%, #17202f 65%, var(--grigio) 100%);
+  }
+  html[data-theme="dark"] .concept-text,
+  html[data-theme="dark"] [style*="color:#2d5a47"],
+  html[data-theme="dark"] [style*="color: #2d5a47"] { color: #8fd9b8 !important; }
+  html[data-theme="dark"] .concept-text strong,
+  html[data-theme="dark"] [style*="color:#1a3d2e"],
+  html[data-theme="dark"] [style*="color: #1a3d2e"] { color: #bdf3da !important; }
+  html[data-theme="dark"] .warning-text,
+  html[data-theme="dark"] [style*="color:#7a4020"],
+  html[data-theme="dark"] [style*="color: #7a4020"] { color: #f0bb8c !important; }
+  html[data-theme="dark"] [style*="color:#7a1010"],
+  html[data-theme="dark"] [style*="color: #7a1010"] { color: #ff9d8c !important; }
+  html[data-theme="dark"] .input-error,
+  html[data-theme="dark"] [style*="color:#c0392b"],
+  html[data-theme="dark"] [style*="color: #c0392b"] { color: #ff8a75 !important; }
+  html[data-theme="dark"] [style*="color:#4a80c4"],
+  html[data-theme="dark"] [style*="color: #4a80c4"] { color: #8fb6ea !important; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--grigio);
+    color: var(--testo);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  /* HEADER */
+  .header {
+    width: 100%;
+    background: var(--blu);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-icon {
+    width: 36px; height: 36px;
+    background: var(--verde);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .header-title {
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .header-sub {
+    color: rgba(255,255,255,0.55);
+    font-size: 12px;
+    font-weight: 400;
+    margin-top: 1px;
+  }
+
+  /* TOGGLE ACCESSIBILITÀ */
+  .access-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 7px 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .access-toggle:hover { background: rgba(255,255,255,0.18); }
+  .access-toggle[aria-pressed="true"] {
+    background: var(--verde-btn);
+    border-color: var(--verde-btn);
+  }
+  .access-icon {
+    font-size: 13px;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+  }
+  .access-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+  }
+  .access-toggle[aria-pressed="true"] .access-label,
+  .access-toggle[aria-pressed="true"] .access-icon {
+    color: white;
+  }
+
+  /* TOGGLE TEMA CHIARO/SCURO */
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    border-radius: 50%;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .theme-toggle:hover { background: rgba(255,255,255,0.18); }
+  .theme-toggle[aria-pressed="true"] {
+    background: var(--verde);
+    border-color: var(--verde);
+  }
+  .theme-icon { font-size: 14px; line-height: 1; }
+
+  /* SELETTORE LINGUA */
+  .lang-switch {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 3px;
+    flex-shrink: 0;
+  }
+  .lang-btn {
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.7);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 9px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .lang-btn:hover { color: white; }
+  .lang-btn.active { background: var(--verde-btn); color: white; }
+
+  /* Nasconde la UI di default del widget Google Translate: lo peschiamo via JS */
+  #google_translate_element,
+  .goog-te-banner-frame,
+  .goog-te-gadget-icon,
+  .goog-te-menu-frame,
+  iframe.skiptranslate,
+  #goog-gt-tt,
+  .goog-te-balloon-frame { display: none !important; visibility: hidden !important; height: 0 !important; }
+  html, html body { top: 0 !important; position: static !important; margin-top: 0 !important; }
+  .goog-te-gadget { font-size: 0 !important; }
+  .goog-text-highlight { background: none !important; box-shadow: none !important; }
+  .goog-tooltip, .goog-tooltip:hover { display: none !important; visibility: hidden !important; }
+  .goog-tooltip:hover { display: none !important; }
+
+  /* MODALITÀ SEMPLICE: testo più grande, più contrasto */
+  body.modo-semplice { font-size: 106%; }
+  body.modo-semplice { --testo-soft: #38414f; }
+  html[data-theme="dark"] body.modo-semplice { --testo-soft: #c3cadb; }
+  body.modo-semplice .card-question { font-size: 22px; line-height: 1.35; }
+  body.modo-semplice .card-hint { font-size: 16px; line-height: 1.65; }
+  body.modo-semplice .concept-text,
+  body.modo-semplice .warning-text { font-size: 16px; line-height: 1.7; }
+  body.modo-semplice .concept-label,
+  body.modo-semplice .warning-label { font-size: 12px; letter-spacing: 0.6px; }
+  body.modo-semplice .card { border-width: 2px; }
+  body.modo-semplice .btn-next {
+    font-size: 17px;
+    padding: 17px;
+  }
+  body.modo-semplice .input-field {
+    font-size: 18px;
+    padding: 15px 16px;
+  }
+  body.modo-semplice .option-btn { padding: 16px 18px; }
+  body.modo-semplice .option-title { font-size: 16px; }
+  body.modo-semplice .option-desc { font-size: 13.5px; line-height: 1.5; }
+  body.modo-semplice .step-label { font-size: 12px; }
+
+  /* Troncamento leggibile per testi lunghi in modalità semplice */
+  .truncabile {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .truncabile.espanso {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+  .btn-leggi-tutto {
+    display: inline-block;
+    margin: 2px 0 10px;
+    background: none;
+    border: none;
+    color: var(--verde-label);
+    font-weight: 700;
+    font-size: 12.5px;
+    cursor: pointer;
+    padding: 4px 0;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-leggi-tutto:hover { text-decoration: underline; }
+
+  /* SCENA NARRATIVA - la casa che cresce */
+  .story-scene {
+    width: 100%;
+    background: linear-gradient(180deg, #dceaf5 0%, #eef4f8 65%, var(--grigio) 100%);
+    overflow: hidden;
+    position: relative;
+  }
+  .story-scene-inner {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 14px 20px 0;
+  }
+  .story-caption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 6px;
+  }
+  .story-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blu-testo);
+  }
+  .story-phase {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--testo-soft);
+    background: rgba(255,255,255,0.7);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  #houseSceneSvg {
+    display: block;
+    width: 100%;
+    height: 108px;
+  }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    width: 100%;
+    background: var(--blu-mid);
+    height: 3px;
+  }
+  .progress-bar-fill {
+    height: 3px;
+    background: var(--verde);
+    transition: width 0.5s ease;
+  }
+
+  /* MAIN */
+  .main {
+    width: 100%;
+    max-width: 640px;
+    padding: 32px 20px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* STEP LABEL */
+  .step-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--testo-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--bianco);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1.5px solid var(--grigio-mid);
+  }
+  .card-question {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--blu-testo);
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  .card-hint {
+    font-size: 14px;
+    color: var(--testo-soft);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  /* CONCEPT BOX */
+  .concept {
+    background: var(--verde-light);
+    border-left: 3px solid var(--verde);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+  .concept-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--verde-label);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+  .concept-text {
+    font-size: 13px;
+    color: #2d5a47;
+    line-height: 1.6;
+  }
+  .concept-text strong { color: #1a3d2e; }
+
+  /* WARNING BOX */
+  .warning {
+    background: var(--arancio-light);
+    border-left: 3px solid var(--arancio);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 16px;
+    margin-top: 12px;
+  }
+  .warning-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--arancio-label);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+  .warning-text {
+    font-size: 13px;
+    color: #7a4020;
+    line-height: 1.6;
+  }
+
+  /* INPUT */
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .input-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--testo);
+  }
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .input-field {
+    flex: 1;
+    padding: 12px 14px;
+    border: 1.5px solid var(--grigio-mid);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--blu-testo);
+    outline: none;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+  }
+  .input-field::-webkit-outer-spin-button,
+  .input-field::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .input-field:focus { border-color: var(--verde); }
+  .input-unit {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--testo-soft);
+    white-space: nowrap;
+  }
+  .input-error {
+    font-size: 12px;
+    color: #c0392b;
+    display: none;
+  }
+  .input-error.visible { display: block; }
+
+  /* SLIDER */
+  .slider-wrap { margin-bottom: 4px; }
+  .slider {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--grigio-mid);
+    outline: none;
+    cursor: pointer;
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--verde);
+    border: 3px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--testo-soft);
+    margin-top: 6px;
+  }
+
+  /* OPTIONS */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .option-btn {
+    padding: 14px 16px;
+    border: 1.5px solid var(--grigio-mid);
+    border-radius: 12px;
+    background: var(--bianco);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .option-btn:hover { border-color: var(--verde); background: var(--verde-light); }
+  .option-btn.selected { border-color: var(--verde); background: var(--verde-light); }
+  .option-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--blu-testo);
+    margin-bottom: 3px;
+  }
+  .option-desc {
+    font-size: 12px;
+    color: var(--testo-soft);
+    line-height: 1.4;
+  }
+
+  /* BUTTON */
+  .btn-next {
+    width: 100%;
+    padding: 15px;
+    background: var(--blu);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 4px;
+  }
+  .btn-next:hover { background: var(--blu-mid); }
+  .btn-next:disabled { background: var(--grigio-mid); color: var(--testo-soft); cursor: not-allowed; }
+
+  /* RIEPILOGO RESULT */
+  .result-card {
+    background: var(--blu);
+    border-radius: 16px;
+    padding: 28px 24px;
+    color: white;
+  }
+  .result-title {
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    font-weight: 500;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .result-big {
+    font-size: 42px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .result-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 28px;
+  }
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .result-item {
+    background: rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .result-item-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .result-item-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+  }
+  .result-item-value.green { color: #7de8c0; }
+  .result-item-value.orange { color: #f5a872; }
+
+  /* COMPARISON */
+  .comparison {
+    background: var(--bianco);
+    border-radius: 16px;
+    border: 1.5px solid var(--grigio-mid);
+    overflow: hidden;
+  }
+  .comparison-header {
+    padding: 16px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--testo-soft);
+    background: var(--grigio);
+    border-bottom: 1px solid var(--grigio-mid);
+  }
+  .comparison-row {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--grigio-mid);
+    gap: 12px;
+  }
+  .comparison-row:last-child { border-bottom: none; }
+  .comp-label { flex: 1; font-size: 14px; font-weight: 500; color: var(--testo); }
+  .comp-a { width: 90px; text-align: right; font-size: 14px; font-weight: 700; color: var(--blu-testo); }
+  .comp-b { width: 90px; text-align: right; font-size: 14px; font-weight: 700; color: var(--verde-label); }
+  .comp-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .tag-better { background: var(--verde-light); color: var(--verde-label); }
+  .tag-worse { background: var(--arancio-light); color: var(--arancio-label); }
+  .tag-neutral { background: var(--grigio); color: var(--testo-soft); }
+  .comp-col-header {
+    display: flex;
+    padding: 10px 20px;
+    gap: 12px;
+    background: var(--grigio);
+    border-bottom: 1px solid var(--grigio-mid);
+  }
+  .col-h { font-size: 11px; font-weight: 700; }
+  .col-h.a { width: 90px; margin-left: auto; text-align: right; color: var(--blu-testo); }
+  .col-h.b { width: 90px; text-align: right; color: var(--verde-label); }
+
+  /* TIMELINE */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 16px 0;
+  }
+  .tl-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding-bottom: 20px;
+    position: relative;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    bottom: 0;
+    width: 2px;
+    background: var(--grigio-mid);
+  }
+  .tl-item:last-child::before { display: none; }
+  .tl-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--verde-light);
+    border: 2px solid var(--verde);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .tl-content { flex: 1; padding-top: 4px; }
+  .tl-title { font-size: 14px; font-weight: 700; color: var(--blu-testo); margin-bottom: 4px; }
+  .tl-text { font-size: 13px; color: var(--testo-soft); line-height: 1.5; }
+
+  /* BACK BTN */
+  .btn-back {
+    background: none;
+    border: none;
+    color: var(--testo-soft);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+  }
+  .btn-back:hover { color: var(--testo); }
+
+  /* RESTART */
+  .btn-restart {
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    color: var(--blu-testo);
+    border: 1.5px solid var(--grigio-mid);
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .btn-restart:hover { background: var(--grigio); }
+
+  /* GRAFICO RATA (Chart.js) */
+  .chart-container {
+    position: relative;
+    height: 240px;
+    width: 100%;
+    margin: 16px 0 4px;
+  }
+  .chart-axis-hint {
+    font-size: 11.5px;
+    color: var(--testo-soft);
+    line-height: 1.5;
+    margin-bottom: 18px;
+  }
+  .chart-axis-hint strong { color: var(--testo); }
+
+  /* PROSPETTO RATA MENSILE (tabella) */
+  .tabella-wrap {
+    overflow-x: auto;
+    margin: 4px 0 18px;
+    border: 1.5px solid var(--grigio-mid);
+    border-radius: 12px;
+  }
+  .tabella-rate {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    min-width: 460px;
+  }
+  .tabella-rate th, .tabella-rate td {
+    padding: 10px 12px;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .tabella-rate th:first-child, .tabella-rate td:first-child { text-align: left; }
+  .tabella-rate thead th {
+    background: var(--grigio);
+    color: var(--testo-soft);
+    font-weight: 700;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid var(--grigio-mid);
+  }
+  .tabella-rate tbody tr:not(:last-child) td { border-bottom: 1px solid var(--grigio-mid); }
+  .tabella-rate tbody td { color: var(--testo); }
+  .tabella-rate td.col-interessi { color: var(--arancio-label); font-weight: 600; }
+  .tabella-rate td.col-capitale { color: var(--blu-testo); font-weight: 600; }
+  .tabella-caption {
+    font-size: 11px;
+    color: var(--testo-soft);
+    line-height: 1.5;
+    margin: -8px 0 16px;
+  }
+
+  /* HIDDEN */
+  .hidden { display: none !important; }
+
+  /* ANIMATE IN */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: slideUp 0.3s ease forwards; }
+
+  /* SOSTENIBILITA METER */
+  .meter-wrap { margin: 16px 0; }
+  .meter-track {
+    height: 14px;
+    background: var(--grigio-mid);
+    border-radius: 7px;
+    overflow: hidden;
+    position: relative;
+  }
+  .meter-fill {
+    height: 100%;
+    border-radius: 7px;
+    transition: width 0.4s ease, background 0.4s ease;
+  }
+  .meter-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--testo-soft);
+    margin-top: 5px;
+    font-weight: 600;
+  }
+  .meter-marker {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: rgba(0,0,0,0.25);
+  }
+
+  /* COSTI GRID */
+  .costi-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 4px 0 16px;
+  }
+  .costo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--grigio);
+    border-radius: 10px;
+  }
+  .costo-icon { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+  .costo-info { flex: 1; }
+  .costo-nome { font-size: 13px; font-weight: 600; color: var(--testo); }
+  .costo-desc { font-size: 11px; color: var(--testo-soft); margin-top: 1px; }
+  .costo-input-wrap { display: flex; align-items: center; gap: 4px; }
+  .costo-inp {
+    width: 80px;
+    padding: 6px 8px;
+    border: 1.5px solid var(--grigio-mid);
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blu-testo);
+    text-align: right;
+    -moz-appearance: textfield;
+  }
+  .costo-inp::-webkit-outer-spin-button,
+  .costo-inp::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .costo-inp:focus { outline: none; border-color: var(--verde); }
+  .costo-unit { font-size: 11px; color: var(--testo-soft); font-weight: 600; }
+  .totale-costi {
+    background: var(--blu);
+    color: white;
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #preview_costi:not(:empty) { margin-top: 16px; }
+  .totale-label { font-size: 13px; color: rgba(255,255,255,0.7); }
+  .totale-value { font-size: 24px; font-weight: 800; }
+
+  /* SCENARI VITA */
+  .scenario-card {
+    border: 1.5px solid var(--grigio-mid);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .scenario-header {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    background: var(--bianco);
+    user-select: none;
+  }
+  .scenario-emoji { font-size: 22px; }
+  .scenario-title-wrap { flex: 1; }
+  .scenario-title { font-size: 15px; font-weight: 700; color: var(--blu-testo); }
+  .scenario-sub { font-size: 12px; color: var(--testo-soft); margin-top: 2px; }
+  .scenario-chevron { font-size: 12px; color: var(--testo-soft); transition: transform 0.2s; }
+  .scenario-body {
+    padding: 0 16px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    background: var(--grigio);
+    border-top: 0px solid var(--grigio-mid);
+  }
+  .scenario-body.open {
+    max-height: 400px;
+    padding: 14px 16px;
+    border-top: 1px solid var(--grigio-mid);
+  }
+  .scenario-chevron.open { transform: rotate(180deg); }
+
+  /* PUNTEGGIO SALUTE - gauge */
+  .gauge-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0 4px;
+  }
+  .gauge-svg { width: 100%; max-width: 280px; height: auto; }
+  .gauge-score {
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1;
+    margin-top: -8px;
+  }
+  .gauge-verdict {
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 4px;
+    text-align: center;
+  }
+  .gauge-sub {
+    font-size: 12px;
+    color: var(--testo-soft);
+    text-align: center;
+    margin-top: 2px;
+  }
+  .pillar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 18px 0 8px;
+  }
+  .pillar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .pillar-icon { font-size: 18px; width: 26px; text-align: center; flex-shrink: 0; }
+  .pillar-info { flex: 1; }
+  .pillar-name { font-size: 13px; font-weight: 600; color: var(--testo); margin-bottom: 4px; }
+  .pillar-track {
+    height: 8px;
+    background: var(--grigio-mid);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .pillar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+  .pillar-score { font-size: 12px; font-weight: 700; width: 50px; text-align: right; flex-shrink: 0; }
+  .suggerimento-box {
+    background: var(--blu);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    color: white;
+  }
+  .suggerimento-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+  .suggerimento-text { font-size: 13px; line-height: 1.6; }
+
+  /* NOTA LEGALE */
+  .legal {
+    font-size: 11px;
+    color: var(--testo-soft);
+    text-align: center;
+    line-height: 1.5;
+    padding: 0 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">🏠</div>
+  <div style="flex:1">
+    <div class="header-title">Capire il Mutuo</div>
+    <div class="header-sub">Guida educativa passo per passo</div>
+  </div>
+  <div class="lang-switch notranslate" role="group" aria-label="Seleziona lingua" translate="no">
+    <button type="button" class="lang-btn active" data-lang="it" onclick="setLanguage('it')" title="Italiano">IT</button>
+    <button type="button" class="lang-btn" data-lang="en" onclick="setLanguage('en')" title="English">EN</button>
+    <button type="button" class="lang-btn" data-lang="de" onclick="setLanguage('de')" title="Deutsch">DE</button>
+  </div>
+  <button id="accessBtn" class="access-toggle" onclick="toggleModoSemplice()" aria-pressed="false" title="Ingrandisci il testo e aumenta il contrasto">
+    <span class="access-icon">Aa</span>
+    <span class="access-label">Testo grande</span>
+  </button>
+  <button id="themeBtn" class="theme-toggle" onclick="toggleTema()" aria-pressed="false" title="Attiva il tema scuro">
+    <span class="theme-icon" id="themeIcon">🌙</span>
+  </button>
+</div>
+<div id="google_translate_element"></div>
+<div class="progress-bar-wrap">
+  <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+</div>
+<div class="story-scene">
+  <div class="story-scene-inner">
+    <div class="story-caption">
+      <div class="story-name" id="storyName">La tua storia</div>
+      <div class="story-phase" id="storyPhase">Si comincia</div>
+    </div>
+    <svg id="houseSceneSvg" viewBox="0 0 400 108" preserveAspectRatio="xMidYMax meet"></svg>
+  </div>
+</div>
+
+<div class="main" id="mainContent"></div>
+
+<script>
+const state = {
+  step: 0,
+  nome: '',
+  valore_immobile: null,
+  acconto: null,
+  garanzia_consap: null,
+  eta: null,
+  durata: 20,
+  tipo_tasso: null,
+  tasso_fisso: 3.5,
+  spread: 1.2,
+  euribor: 3.8,
+  reddito: null,
+  spese_istruttoria: 1000,
+  spese_perizia: 350,
+  spese_notaio: 3500,
+  cointestato: null,
+  eta2: null,
+  reddito2: null,
+  modoSemplice: false,
+};
+
+const steps = [
+  'benvenuto',
+  'valore_immobile',
+  'acconto',
+  'ltv_spiegazione',
+  'intestatari',
+  'durata',
+  'tipo_tasso',
+  'tasso_dettaglio',
+  'costi_iniziali',
+  'riepilogo',
+  'punteggio_salute',
+  'confronto',
+  'scenari_vita',
+  'timeline_acquisto',
+];
+
+const TOTAL_STEPS = steps.length;
+
+function fmt(n, decimals=0) {
+  return n.toLocaleString('it-IT', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+function fmtEuro(n, decimals=0) {
+  return '€ ' + fmt(n, decimals);
+}
+
+// Un campo numerico è "popolato" se ha un valore non vuoto entro i suoi limiti (min/max sull'input)
+function campoNumericoValido(id) {
+  const el = document.getElementById(id);
+  if (!el || el.value === '') return false;
+  const val = parseFloat(el.value);
+  if (isNaN(val)) return false;
+  const min = el.min !== '' ? parseFloat(el.min) : -Infinity;
+  const max = el.max !== '' ? parseFloat(el.max) : Infinity;
+  return val >= min && val <= max;
+}
+
+function calcRata(capitale, tasso_annuo, anni) {
+  if (tasso_annuo === 0) return capitale / (anni * 12);
+  const r = tasso_annuo / 100 / 12;
+  const n = anni * 12;
+  return capitale * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+}
+
+function getLTV() {
+  const mutuo = state.valore_immobile - state.acconto;
+  return (mutuo / state.valore_immobile) * 100;
+}
+
+function getMutuo() {
+  return state.valore_immobile - state.acconto;
+}
+
+function getTassoVariabile() {
+  return state.euribor + state.spread;
+}
+
+function getEtaVincolante() {
+  // In un mutuo cointestato, la maggior parte delle banche calcola la durata massima
+  // sull'intestatario più anziano: è il vincolo più restrittivo per l'intera pratica.
+  if (state.cointestato && state.eta2) {
+    return Math.max(state.eta || 0, state.eta2);
+  }
+  return state.eta;
+}
+
+function getRedditoTotale() {
+  const r1 = state.reddito || 0;
+  const r2 = (state.cointestato && state.reddito2) ? state.reddito2 : 0;
+  return r1 + r2;
+}
+
+function setProgress(current) {
+  const pct = Math.round((current / (TOTAL_STEPS - 1)) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  renderStoryScene(pct);
+}
+
+// ─── SCENA NARRATIVA: la casa che cresce ────────────────────────────────────
+const FASI = [
+  { soglia: 0,   nome: 'Il terreno' },
+  { soglia: 14,  nome: 'Le fondamenta' },
+  { soglia: 28,  nome: 'I muri' },
+  { soglia: 42,  nome: 'Il tetto' },
+  { soglia: 56,  nome: 'Porta e finestre' },
+  { soglia: 70,  nome: 'Il giardino' },
+  { soglia: 84,  nome: 'Le luci accese' },
+  { soglia: 96,  nome: 'Casa, dolce casa' },
+];
+
+function renderStoryScene(pct) {
+  const nameEl = document.getElementById('storyName');
+  const phaseEl = document.getElementById('storyPhase');
+  const svg = document.getElementById('houseSceneSvg');
+  if (!svg) return;
+
+  const fase = [...FASI].reverse().find(f => pct >= f.soglia) || FASI[0];
+  if (nameEl) nameEl.textContent = state.nome ? `La casa di ${state.nome}` : 'La tua storia';
+  if (phaseEl) phaseEl.textContent = fase.nome;
+
+  // Helper di visibilità cumulativa: ogni elemento appare sopra una soglia e resta
+  const show = (soglia) => pct >= soglia;
+  const groundY = 92;
+
+  let svgParts = [];
+
+  // Cielo e sole sempre presenti
+  svgParts.push(`<circle cx="358" cy="24" r="14" fill="#ffd97a" opacity="0.9"/>`);
+  // Nuvole leggere
+  svgParts.push(`<ellipse cx="60" cy="26" rx="22" ry="8" fill="#ffffff" opacity="0.7"/>`);
+  svgParts.push(`<ellipse cx="140" cy="18" rx="16" ry="6" fill="#ffffff" opacity="0.5"/>`);
+
+  // Terreno (sempre)
+  svgParts.push(`<rect x="0" y="${groundY}" width="400" height="16" fill="#c9dfc2"/>`);
+  svgParts.push(`<rect x="0" y="${groundY+10}" width="400" height="6" fill="#b7d4ae"/>`);
+
+  // Recinzione/lotto delimitato (fase terreno)
+  if (show(0)) {
+    svgParts.push(`<line x1="60" y1="${groundY}" x2="60" y2="${groundY-6}" stroke="#9db894" stroke-width="2"/>`);
+    svgParts.push(`<line x1="60" y1="${groundY-6}" x2="340" y2="${groundY-6}" stroke="#9db894" stroke-width="2" stroke-dasharray="4,4"/>`);
+    svgParts.push(`<line x1="340" y1="${groundY}" x2="340" y2="${groundY-6}" stroke="#9db894" stroke-width="2"/>`);
+  }
+
+  // Fondamenta (blocco grigio alla base)
+  if (show(14)) {
+    svgParts.push(`<rect x="120" y="${groundY-4}" width="160" height="10" fill="#a8adb5" rx="1"/>`);
+  }
+
+  // Muri
+  const wallTop = 46;
+  if (show(28)) {
+    const wallH = Math.min(groundY - wallTop, (groundY - wallTop) * Math.min(1, (pct-28)/10 + 0.4));
+    svgParts.push(`<rect x="130" y="${groundY - wallH}" width="140" height="${wallH}" fill="#e3c9a3" />`);
+    svgParts.push(`<rect x="130" y="${groundY - wallH}" width="140" height="${wallH}" fill="none" stroke="#c7a97a" stroke-width="1.5" />`);
+  }
+
+  // Tetto
+  if (show(42)) {
+    svgParts.push(`<polygon points="120,${wallTop} 200,14 280,${wallTop}" fill="#c0533f"/>`);
+    svgParts.push(`<polygon points="120,${wallTop} 200,14 280,${wallTop}" fill="none" stroke="#9c4230" stroke-width="1.5"/>`);
+    svgParts.push(`<rect x="240" y="20" width="10" height="20" fill="#8b8b8b"/>`); // camino
+  }
+
+  // Porta e finestre
+  if (show(56)) {
+    // porta
+    svgParts.push(`<rect x="188" y="66" width="24" height="26" rx="2" fill="#6b4226"/>`);
+    svgParts.push(`<circle cx="206" cy="80" r="1.4" fill="#f0c419"/>`);
+    // finestre
+    svgParts.push(`<rect x="145" y="58" width="20" height="18" rx="2" fill="#bfe3f0" stroke="#8fa9b3" stroke-width="1.5"/>`);
+    svgParts.push(`<rect x="235" y="58" width="20" height="18" rx="2" fill="#bfe3f0" stroke="#8fa9b3" stroke-width="1.5"/>`);
+    svgParts.push(`<line x1="155" y1="58" x2="155" y2="76" stroke="#8fa9b3" stroke-width="1.2"/>`);
+    svgParts.push(`<line x1="245" y1="58" x2="245" y2="76" stroke="#8fa9b3" stroke-width="1.2"/>`);
+  }
+
+  // Giardino: alberello + siepe + sentiero
+  if (show(70)) {
+    svgParts.push(`<rect x="200" y="88" width="8" height="4" fill="#d8c9a3"/>`); // sentiero base
+    svgParts.push(`<circle cx="100" cy="82" r="9" fill="#5c9a5f"/>`);
+    svgParts.push(`<rect x="98" y="88" width="4" height="6" fill="#7a5a3a"/>`);
+    svgParts.push(`<circle cx="310" cy="84" r="7" fill="#5c9a5f"/>`);
+    svgParts.push(`<rect x="308" y="90" width="3" height="4" fill="#7a5a3a"/>`);
+  }
+
+  // Luci accese in casa (calore, sera)
+  if (show(84)) {
+    svgParts.push(`<rect x="145" y="58" width="20" height="18" rx="2" fill="#ffe9a8"/>`);
+    svgParts.push(`<rect x="235" y="58" width="20" height="18" rx="2" fill="#ffe9a8"/>`);
+    svgParts.push(`<line x1="155" y1="58" x2="155" y2="76" stroke="#e8c877" stroke-width="1.2"/>`);
+    svgParts.push(`<line x1="245" y1="58" x2="245" y2="76" stroke="#e8c877" stroke-width="1.2"/>`);
+  }
+
+  // Finale: cuoricino sopra la casa, cassetta della posta, tutto completo
+  if (show(96)) {
+    svgParts.push(`<text x="200" y="8" text-anchor="middle" font-size="14">💚</text>`);
+    svgParts.push(`<rect x="118" y="86" width="6" height="8" fill="#8b8b8b"/>`);
+  }
+
+  svg.innerHTML = svgParts.join('');
+}
+
+function render() {
+  const step = steps[state.step];
+  setProgress(state.step);
+  const main = document.getElementById('mainContent');
+  main.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'animate-in';
+
+  if (state.step > 0) {
+    wrap.innerHTML += `<button class="btn-back" onclick="goBack()">← Torna indietro</button>`;
+  }
+
+  switch(step) {
+    case 'benvenuto': renderBenvenuto(wrap); break;
+    case 'valore_immobile': renderValoreImmobile(wrap); break;
+    case 'acconto': renderAcconto(wrap); break;
+    case 'ltv_spiegazione': renderLTV(wrap); break;
+    case 'intestatari': renderIntestatari(wrap); break;
+    case 'durata': renderDurata(wrap); break;
+    case 'tipo_tasso': renderTipoTasso(wrap); break;
+    case 'tasso_dettaglio': renderTassoDettaglio(wrap); break;
+    case 'costi_iniziali': renderCostiIniziali(wrap); break;
+    case 'riepilogo': renderRiepilogo(wrap); break;
+    case 'punteggio_salute': renderPunteggioSalute(wrap); break;
+    case 'confronto': renderConfronto(wrap); break;
+    case 'scenari_vita': renderScenariVita(wrap); break;
+    case 'timeline_acquisto': renderTimeline(wrap); break;
+  }
+
+  main.appendChild(wrap);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Tutti gli init post-DOM centralizzati qui, dopo che wrap è nel DOM
+  const currentStep = steps[state.step];
+
+  if (currentStep === 'intestatari') {
+    const inpEta = document.getElementById('inp_eta');
+    if (inpEta) {
+      inpEta.addEventListener('input', () => { updateEtaPreview(); sincronizzaBtnContinuaIntestatari(); });
+      updateEtaPreview();
+    }
+    if (state.cointestato === true) {
+      const btnCoppia = document.querySelectorAll('#options_cointestazione .option-btn')[1];
+      if (btnCoppia) selectCointestazione(true, btnCoppia);
+    } else if (state.cointestato === false) {
+      const btnSolo = document.querySelectorAll('#options_cointestazione .option-btn')[0];
+      if (btnSolo) selectCointestazione(false, btnSolo);
+    }
+    const inpRed = document.getElementById('inp_reddito');
+    if (inpRed) {
+      inpRed.addEventListener('input', () => { updateRedditoPreview(); sincronizzaBtnContinuaIntestatari(); });
+      updateRedditoPreview();
+    }
+    sincronizzaBtnContinuaIntestatari();
+  }
+  if (currentStep === 'valore_immobile') {
+    updatePreview();
+    const inpValore = document.getElementById('inp_valore');
+    if (inpValore) inpValore.addEventListener('keyup', e => {
+      if (e.key === 'Enter') saveValoreImmobile();
+    });
+  }
+  if (currentStep === 'acconto') {
+    updateAccontoPreview();
+  }
+  if (currentStep === 'durata') {
+    updateDurata(state.durata);
+  }
+  if (currentStep === 'tasso_dettaglio') {
+    if (state.tipo_tasso === 'fisso' || state.tipo_tasso === 'misto') {
+      updateTassoFissoPreview();
+    } else {
+      updateVariabilePreview();
+    }
+  }
+  if (currentStep === 'costi_iniziali') {
+    updateCostiPreview();
+    ['inp_istruttoria','inp_perizia','inp_notaio'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', updateCostiPreview);
+    });
+  }
+  // Applica la modalità semplice (font, contrasto, troncamento) ad ogni render
+  applyModoSemplice();
+}
+
+function renderBenvenuto(wrap) {
+  wrap.innerHTML += `
+    <div class="step-label">Introduzione</div>
+    <div class="card">
+      <div class="card-question">Il mutuo spiegato in modo semplice</div>
+      <div class="card-hint">
+        Risponderai a poche domande sulla casa che vuoi acquistare. 
+        Ad ogni passo ti spieghiamo cosa significa ogni numero e ogni scelta, 
+        senza gergo tecnico.
+      </div>
+      <div class="concept">
+        <div class="concept-label">💡 Cos'è un mutuo</div>
+        <div class="concept-text">
+          Un mutuo è un prestito a lungo termine che una banca ti dà per comprare casa. 
+          Tu restituisci i soldi mese per mese — ogni pagamento si chiama <strong>rata</strong> — 
+          per un periodo che può durare da 10 a 30 anni. 
+          In cambio, la banca ti chiede gli <strong>interessi</strong>: una percentuale aggiuntiva 
+          sul denaro che ti ha prestato.
+        </div>
+      </div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot">1</div><div class="tl-content"><div class="tl-title">Valore della casa e acconto</div><div class="tl-text">Quanto costa la casa e quanto puoi versare subito di tasca tua.</div></div></div>
+        <div class="tl-item"><div class="tl-dot">2</div><div class="tl-content"><div class="tl-title">Durata del mutuo</div><div class="tl-text">Per quanti anni vuoi restituire i soldi alla banca.</div></div></div>
+        <div class="tl-item"><div class="tl-dot">3</div><div class="tl-content"><div class="tl-title">Tasso d'interesse</div><div class="tl-text">La percentuale che la banca ti chiede in più per prestarti i soldi.</div></div></div>
+        <div class="tl-item"><div class="tl-dot">4</div><div class="tl-content"><div class="tl-title">Il tuo riepilogo</div><div class="tl-text">Rata mensile, costo totale e un confronto tra le opzioni.</div></div></div>
+      </div>
+      <div class="input-group">
+        <div class="input-label">Come vuoi chiamare il protagonista di questa storia? (facoltativo)</div>
+        <div class="input-row">
+          <input type="text" class="input-field" id="inp_nome" placeholder="Es. Marco, Giulia..." maxlength="20" value="${state.nome || ''}">
+        </div>
+      </div>
+      <div class="warning">
+        <div class="warning-label">⚠️ Nota importante</div>
+        <div class="warning-text">Questo strumento è solo educativo. I calcoli mostrano stime indicative per capire come funziona un mutuo. Per una valutazione reale rivolgiti sempre a un consulente finanziario o alla tua banca.</div>
+      </div>
+      <button class="btn-next" onclick="saveNome()">Inizia →</button>
+    </div>`;
+}
+
+function saveNome() {
+  const v = document.getElementById('inp_nome').value.trim();
+  state.nome = v;
+  nextStep();
+}
+
+function renderValoreImmobile(wrap) {
+  wrap.innerHTML += `
+    <div class="step-label">La casa</div>
+    <div class="card">
+      <div class="card-question">Quanto costa la casa che vuoi acquistare?</div>
+      <div class="card-hint">Inserisci il prezzo di vendita concordato o indicativo.</div>
+      <div class="concept">
+        <div class="concept-label">💡 Valore dell'immobile</div>
+        <div class="concept-text">
+          È il prezzo totale della casa. Tieni presente che al prezzo di vendita 
+          si aggiungono altri costi: <strong>notaio</strong> (circa 2.000–5.000€), 
+          <strong>imposte</strong> (2% o 9% del valore catastale), 
+          <strong>agenzia immobiliare</strong> (circa 2–3% del prezzo). 
+          La banca di solito finanzia solo il prezzo della casa, non queste spese accessorie.
+        </div>
+      </div>
+      <div class="input-group">
+        <div class="input-label">Prezzo della casa</div>
+        <div class="input-row">
+          <input type="number" class="input-field" id="inp_valore" 
+            placeholder="200000" min="50000" max="2000000" step="5000"
+            value="${state.valore_immobile || ''}"
+            oninput="updatePreview()">
+          <span class="input-unit">€</span>
+        </div>
+        <div class="input-error" id="err_valore">Inserisci un valore tra 50.000€ e 2.000.000€</div>
+      </div>
+      <div id="preview_valore" style="display:none" class="concept">
+        <div class="concept-label">📊 Riepilogo rapido</div>
+        <div class="concept-text" id="preview_valore_text"></div>
+      </div>
+      <button class="btn-next" id="btn_valore" onclick="saveValoreImmobile()" disabled>Continua →</button>
+    </div>`;
+
+}
+
+function updatePreview() {
+  const btn = document.getElementById('btn_valore');
+  if (btn) btn.disabled = !campoNumericoValido('inp_valore');
+
+  const v = parseFloat(document.getElementById('inp_valore')?.value);
+  const preview = document.getElementById('preview_valore');
+  if (!preview) return;
+  if (v > 0) {
+    preview.style.display = 'block';
+    const spese = Math.round(v * 0.025) + 3000;
+    document.getElementById('preview_valore_text').innerHTML =
+      `Per una casa da <strong>${fmtEuro(v)}</strong>, considera circa <strong>${fmtEuro(spese)}</strong> di spese accessorie 
+      (notaio, imposte, agenzia). Il totale da avere disponibile è circa <strong>${fmtEuro(v + spese)}</strong>.`;
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+function saveValoreImmobile() {
+  const v = parseFloat(document.getElementById('inp_valore').value);
+  if (!v || v < 50000 || v > 2000000) {
+    document.getElementById('err_valore').classList.add('visible');
+    return;
+  }
+  state.valore_immobile = v;
+  nextStep();
+}
+
+function getMinAccontoPct() {
+  return state.garanzia_consap ? 0 : 0.1;
+}
+
+function renderAcconto(wrap) {
+  const minPct = getMinAccontoPct();
+  const max_acconto = Math.round(state.valore_immobile * 0.8);
+  const min_acc = Math.round(state.valore_immobile * minPct);
+  const default_acc = state.acconto != null ? state.acconto : Math.round(state.valore_immobile * 0.2);
+
+  wrap.innerHTML += `
+    <div class="step-label">L'acconto</div>
+    <div class="card">
+      <div class="card-question">Rientri nella Garanzia Statale prima casa (Consap)?</div>
+      <div class="card-hint">Se hai diritto a questa garanzia pubblica, puoi ottenere il mutuo anche senza anticipo.</div>
+      <div class="concept">
+        <div class="concept-label">💡 Cos'è il Fondo di Garanzia prima casa (Consap)</div>
+        <div class="concept-text">
+          È un fondo pubblico, gestito da Consap, che garantisce alla banca una parte del mutuo
+          per l'acquisto della prima casa. Grazie a questa garanzia, alcune banche possono finanziare
+          fino al <strong>100% del valore dell'immobile</strong>, senza richiedere anticipo.<br><br>
+          L'accesso è riservato a categorie specifiche stabilite dalla legge (ad esempio persone under 36
+          con determinati requisiti ISEE, o altre categorie prioritarie), e i requisiti possono cambiare nel tempo.
+          La banca resta comunque libera di valutare la tua situazione, e continuano a valere le stesse
+          regole di sostenibilità della rata rispetto al reddito.<br><br>
+          Verifica i requisiti aggiornati con la tua banca o su consap.it prima di fare affidamento su questa opzione.
+        </div>
+      </div>
+      <div class="options" id="options_consap">
+        <button class="option-btn ${state.garanzia_consap === true ? 'selected' : ''}" onclick="selectConsap(true, this)">
+          <div class="option-title">✅ Sì, rientro nella garanzia</div>
+          <div class="option-desc">Posso valutare un mutuo fino al 100% del valore della casa, senza anticipo.</div>
+        </button>
+        <button class="option-btn ${state.garanzia_consap === false ? 'selected' : ''}" onclick="selectConsap(false, this)">
+          <div class="option-title">🚫 No / non so</div>
+          <div class="option-desc">Procedo con le condizioni standard (anticipo richiesto dalla banca).</div>
+        </button>
+      </div>
+      <div class="card-question" style="margin-top:24px">Quanti soldi puoi versare subito di tasca tua?</div>
+      <div class="card-hint">Questo si chiama acconto o anticipo. Il resto lo copre il mutuo.</div>
+      <div class="concept">
+        <div class="concept-label">💡 Cos'è l'acconto</div>
+        <div class="concept-text" id="testo_acconto">
+          L'acconto è la parte del prezzo che paghi tu con i tuoi risparmi, il giorno del rogito.
+          La banca copre la differenza con il mutuo.
+          Più alto è l'acconto, <strong>meno soldi chiedi in prestito</strong> e meno interessi paghi in totale.
+          ${state.garanzia_consap
+            ? 'Con la Garanzia Statale prima casa selezionata sopra, puoi impostare anche un anticipo di 0€.'
+            : 'Le banche di solito finanziano al massimo l\'<strong>80% del valore della casa</strong>, quindi di norma serve almeno il <strong>20% di anticipo</strong> (qui puoi simulare fino al 10% per curiosità).'}
+        </div>
+      </div>
+      <div class="input-group">
+        <div class="input-label">Acconto disponibile</div>
+        <div class="input-row">
+          <input type="number" class="input-field" id="inp_acconto"
+            placeholder="${fmt(default_acc)}" min="${min_acc}" max="${max_acconto}" step="1000"
+            value="${state.acconto != null ? state.acconto : default_acc}"
+            oninput="updateAccontoPreview()">
+          <span class="input-unit">€</span>
+        </div>
+        <div class="input-error" id="err_acconto">L'acconto deve essere tra ${fmtEuro(min_acc)} e ${fmtEuro(max_acconto)}</div>
+        <div class="slider-wrap">
+          <input type="range" class="slider" id="sl_acconto"
+            min="${min_acc}" max="${max_acconto}" step="1000"
+            value="${state.acconto != null ? state.acconto : default_acc}"
+            oninput="syncAccontoSlider(this.value)">
+          <div class="slider-labels">
+            <span>${fmt(minPct*100,0)}% — ${fmtEuro(min_acc)}</span>
+            <span>80% — ${fmtEuro(max_acconto)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="concept" id="preview_acconto">
+        <div class="concept-label">📊 Come si divide</div>
+        <div class="concept-text" id="preview_acconto_text"></div>
+      </div>
+      <button class="btn-next" id="btn_acconto" onclick="saveAcconto()" disabled>Continua →</button>
+    </div>`;
+
+}
+
+function selectConsap(valore, el) {
+  state.garanzia_consap = valore;
+  document.querySelectorAll('#options_consap .option-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+
+  const minPct = getMinAccontoPct();
+  const min_acc = Math.round(state.valore_immobile * minPct);
+  const max_acconto = Math.round(state.valore_immobile * 0.8);
+  const inp = document.getElementById('inp_acconto');
+  const sl = document.getElementById('sl_acconto');
+  if (inp) inp.min = min_acc;
+  if (sl) sl.min = min_acc;
+  const err = document.getElementById('err_acconto');
+  if (err) err.textContent = `L'acconto deve essere tra ${fmtEuro(min_acc)} e ${fmtEuro(max_acconto)}`;
+  const testo = document.getElementById('testo_acconto');
+  if (testo) {
+    testo.innerHTML = `
+          L'acconto è la parte del prezzo che paghi tu con i tuoi risparmi, il giorno del rogito.
+          La banca copre la differenza con il mutuo.
+          Più alto è l'acconto, <strong>meno soldi chiedi in prestito</strong> e meno interessi paghi in totale.
+          ${valore
+            ? 'Con la Garanzia Statale prima casa selezionata sopra, puoi impostare anche un anticipo di 0€.'
+            : 'Le banche di solito finanziano al massimo l\'<strong>80% del valore della casa</strong>, quindi di norma serve almeno il <strong>20% di anticipo</strong> (qui puoi simulare fino al 10% per curiosità).'}`;
+  }
+  const labels = document.querySelector('#sl_acconto')?.closest('.input-group')?.querySelector('.slider-labels');
+  if (labels) labels.innerHTML = `<span>${fmt(minPct*100,0)}% — ${fmtEuro(min_acc)}</span><span>80% — ${fmtEuro(max_acconto)}</span>`;
+  if (inp && parseFloat(inp.value) < min_acc) { inp.value = min_acc; if (sl) sl.value = min_acc; }
+  updateAccontoPreview();
+}
+
+function syncAccontoSlider(val) {
+  const inp = document.getElementById('inp_acconto');
+  if (inp) inp.value = val;
+  updateAccontoPreview();
+}
+
+function updateAccontoPreview() {
+  const inp = document.getElementById('inp_acconto');
+  const sl = document.getElementById('sl_acconto');
+  if (!inp) return;
+
+  const btn = document.getElementById('btn_acconto');
+  if (btn) btn.disabled = !(state.garanzia_consap !== null && campoNumericoValido('inp_acconto'));
+
+  const v = parseFloat(inp.value);
+  if (sl && !isNaN(v)) sl.value = v;
+  const mutuo = state.valore_immobile - v;
+  const pct = Math.round((v / state.valore_immobile) * 100);
+  const ptx = document.getElementById('preview_acconto_text');
+  if (ptx && !isNaN(v) && v >= 0 && mutuo > 0) {
+    const sogliaOk = state.garanzia_consap ? 0 : 20;
+    ptx.innerHTML = `Acconto: <strong>${fmtEuro(v)}</strong> (${pct}%) · Mutuo richiesto: <strong>${fmtEuro(mutuo)}</strong> (${100-pct}%)<br>
+    <span style="color: ${pct >= sogliaOk ? '#2d5a47' : '#c0392b'}">
+    ${state.garanzia_consap
+      ? 'ℹ️ Con la garanzia statale, la banca può finanziare anche il 100% del valore della casa.'
+      : (pct >= 20 ? '✅ Acconto sufficiente per la maggior parte delle banche.' : '⚠️ La maggior parte delle banche richiede almeno il 20% di acconto.')}
+    </span>`;
+  }
+}
+
+function saveAcconto() {
+  const v = parseFloat(document.getElementById('inp_acconto').value);
+  const minPct = getMinAccontoPct();
+  const min_acc = Math.round(state.valore_immobile * minPct);
+  const max_acconto = Math.round(state.valore_immobile * 0.8);
+  if (isNaN(v) || v < min_acc || v > max_acconto) {
+    document.getElementById('err_acconto').classList.add('visible');
+    return;
+  }
+  state.acconto = v;
+  nextStep();
+}
+
+function renderLTV(wrap) {
+  const ltv = getLTV();
+  const mutuo = getMutuo();
+  const ltvColor = ltv <= 50 ? '#4a9b7f' : ltv <= 70 ? '#1a2744' : ltv <= 80 ? '#e8834a' : '#c0392b';
+  const ltvTextColor = ltv <= 50 ? 'var(--verde-label)' : ltv <= 70 ? 'var(--blu-testo)' : ltv <= 80 ? 'var(--arancio-label)' : '#c0392b';
+
+  wrap.innerHTML += `
+    <div class="step-label">Concetto chiave — LTV</div>
+    <div class="card">
+      <div class="card-question">Il tuo Loan-to-Value: ${fmt(ltv, 1)}%</div>
+      <div class="card-hint">Questo numero dice alla banca quanto stai chiedendo rispetto al valore della casa.</div>
+      <div class="concept">
+        <div class="concept-label">💡 Cos'è il Loan-to-Value (LTV)</div>
+        <div class="concept-text">
+          LTV significa letteralmente "rapporto prestito-valore". 
+          Si calcola così: <strong>mutuo ÷ valore casa × 100</strong>.<br><br>
+          Nel tuo caso: <strong>${fmtEuro(mutuo)} ÷ ${fmtEuro(state.valore_immobile)} = ${fmt(ltv,1)}%</strong><br><br>
+          Più il tuo LTV è basso, più la banca ti considera un cliente affidabile — 
+          e spesso ti offre un <strong>tasso d'interesse più basso</strong>.
+        </div>
+      </div>
+      <div style="margin: 16px 0; background: var(--grigio); border-radius: 12px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--testo-soft);">
+          <span>LTV basso = migliori condizioni</span>
+          <span style="color:${ltvTextColor}; font-size:15px; font-weight:800;">${fmt(ltv,1)}%</span>
+        </div>
+        <div style="height: 12px; background: var(--grigio-mid); border-radius: 6px; overflow: hidden;">
+          <div style="height: 100%; width: ${Math.min(ltv,100)}%; background: ${ltvColor}; border-radius: 6px; transition: width 0.6s ease;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 10px; color: var(--testo-soft);">
+          <span>0% — ottimo</span><span>80% — limite comune</span><span>100%</span>
+        </div>
+      </div>
+      ${ltv <= 60 ? `<div class="concept"><div class="concept-label">🎯 Posizione con LTV basso</div><div class="concept-text">Con un LTV del ${fmt(ltv,1)}% sei sotto la soglia del 60-70% indicata spesso dalle banche per le condizioni migliori.</div></div>` :
+        ltv <= 80 ? `<div class="warning"><div class="warning-label">📋 Nella norma</div><div class="warning-text">LTV dell'${fmt(ltv,1)}%: rientra nella norma. Alcune banche potrebbero richiedere un'assicurazione aggiuntiva sopra il 70%.</div></div>` :
+        state.garanzia_consap ? `<div class="concept"><div class="concept-label">🏛️ LTV coperto dalla Garanzia Statale</div><div class="concept-text">LTV dell'${fmt(ltv,1)}%: sopra l'80% le banche di solito richiedono una copertura aggiuntiva. Hai indicato di rientrare nella Garanzia Statale prima casa (Consap), che copre proprio questa parte del mutuo verso la banca. Restano da verificare i requisiti di accesso e la sostenibilità della rata rispetto al reddito.</div></div>` :
+        `<div class="warning"><div class="warning-label">⚠️ LTV elevato</div><div class="warning-text">LTV dell'${fmt(ltv,1)}%: sopra l'80% poche banche finanziano senza garanzie aggiuntive. Un acconto più alto ridurrebbe l'LTV.</div></div>`}
+      <button class="btn-next" onclick="nextStep()">Capito, continua →</button>
+    </div>`;
+}
+
+// ─── INTESTATARI (età, numero di intestatari, reddito) ─────────────────────
+function renderIntestatari(wrap) {
+  wrap.innerHTML += `
+    <div class="step-label">Chi richiede il mutuo</div>
+    <div class="card">
+      <div class="card-question">Quanti anni hai?</div>
+      <div class="card-hint">L'età è importante: le banche fissano un'età massima al termine del mutuo, di solito 75–80 anni.</div>
+      <div class="concept">
+        <div class="concept-label">💡 Il limite di età nei mutui</div>
+        <div class="concept-text">
+          Quasi tutte le banche italiane impongono che il mutuo sia estinto entro i
+          <strong>75 o 80 anni</strong> del richiedente.
+          Questo non è un giudizio sulla persona: è perché la banca deve valutare
+          la capacità di rimborso per tutta la durata del prestito.<br><br>
+          In pratica significa che la <strong>durata massima del mutuo</strong>
+          dipende dalla tua età: se hai 50 anni e il limite è 80,
+          puoi chiedere al massimo <strong>30 anni</strong> di mutuo.
+          Se hai 60 anni, al massimo <strong>20 anni</strong>.
+        </div>
+      </div>
+      <div class="input-group">
+        <div class="input-label">La tua età attuale</div>
+        <div class="input-row">
+          <input type="number" class="input-field" id="inp_eta"
+            placeholder="35" min="18" max="74" step="1"
+            value="${state.eta || ''}">
+          <span class="input-unit">anni</span>
+        </div>
+        <div class="input-error" id="err_eta">Inserisci un'età tra 18 e 74 anni</div>
+      </div>
+      <div id="preview_eta"></div>
+
+      <div class="card-question" style="margin-top:28px">Fai il mutuo da solo o con un'altra persona?</div>
+      <div class="card-hint">Un mutuo cointestato somma i redditi di entrambi, ma usa l'età più restrittiva tra i due per calcolare la durata massima.</div>
+      <div class="concept">
+        <div class="concept-label">💡 Come funziona un mutuo cointestato</div>
+        <div class="concept-text">
+          Se richiedi il mutuo insieme a un'altra persona (partner, familiare), la banca
+          <strong>somma i redditi netti</strong> di entrambi per valutare la sostenibilità della rata —
+          questo spesso permette di chiedere un importo più alto o avere una rata più leggera
+          rispetto al reddito complessivo.<br><br>
+          Per la <strong>durata massima</strong>, invece, la maggior parte delle banche
+          usa l'età dell'intestatario <strong>più anziano</strong>: è il vincolo più prudente,
+          perché la banca deve poter contare sulla capacità di rimborso di entrambi
+          per tutta la durata del prestito.
+        </div>
+      </div>
+      <div class="options" id="options_cointestazione">
+        <button class="option-btn ${state.cointestato === false ? 'selected' : ''}" onclick="selectCointestazione(false, this)">
+          <div class="option-title">🧍 Da solo</div>
+          <div class="option-desc">Un solo intestatario. Reddito ed età contano solo i tuoi.</div>
+        </button>
+        <button class="option-btn ${state.cointestato === true ? 'selected' : ''}" onclick="selectCointestazione(true, this)">
+          <div class="option-title">🧍‍🧍 In coppia (cointestato)</div>
+          <div class="option-desc">Due intestatari. I redditi si sommano, l'età più vincolante è quella del più anziano.</div>
+        </button>
+      </div>
+      <div id="cointestatario_fields"></div>
+
+      <div class="card-question" style="margin-top:28px">${state.cointestato ? 'Quanto guadagni tu al mese (netto)?' : 'Quanto guadagni al mese (netto)?'}</div>
+      <div class="card-hint">${state.cointestato ? 'Il reddito del cointestatario lo inserisci qui sopra: qui metti solo il tuo.' : 'Serve per capire se la rata sarà sostenibile nel lungo periodo. Non viene salvato né condiviso.'}</div>
+      <div class="concept">
+        <div class="concept-label">💡 La regola del 30%</div>
+        <div class="concept-text">
+          Le banche di solito non concedono mutui se la rata supera il <strong>30–35% del reddito netto mensile</strong>${state.cointestato ? ' complessivo della coppia' : ''}.
+          È una soglia prudenziale: sopra il 35% il rischio di difficoltà nel rimborso sale significativamente.<br><br>
+          Esempio: con 2.000€ netti al mese, la rata resterebbe sotto la soglia del 30% se inferiore a circa <strong>600–700€</strong>.
+        </div>
+      </div>
+      <div class="warning">
+        <div class="warning-label">📐 Come viene stimata la rata qui sotto</div>
+        <div class="warning-text">
+          La stima usa un tasso di riferimento del <strong>3,5%</strong> e la durata attuale di <strong>${state.durata} anni</strong> (potrai ancora modificarla al passo successivo).
+          Se durata o tasso reale saranno diversi, la rata (e questa percentuale) cambierà di conseguenza.
+        </div>
+      </div>
+      <div class="input-group">
+        <div class="input-label">Il tuo reddito netto mensile</div>
+        <div class="input-row">
+          <input type="number" class="input-field" id="inp_reddito"
+            placeholder="2500" min="500" max="50000" step="100"
+            value="${state.reddito || ''}">
+          <span class="input-unit">€/mese</span>
+        </div>
+        <div class="input-error" id="err_reddito">Inserisci un valore valido</div>
+      </div>
+      <div id="preview_reddito"></div>
+
+      <button class="btn-next" id="btn_continua_intestatari" onclick="saveIntestatari()" disabled>Continua →</button>
+    </div>`;
+}
+
+function updateEtaPreview() {
+  const eta = parseInt(document.getElementById('inp_eta')?.value);
+  const box = document.getElementById('preview_eta');
+  if (!box) return;
+  const ETA_MAX = 80;
+  if (!eta || eta < 18 || eta > 74) { box.innerHTML = ''; return; }
+  const durataMax = ETA_MAX - eta;
+  const etaFine = eta + durataMax;
+  const colore = durataMax >= 25 ? 'var(--verde)' : durataMax >= 15 ? 'var(--arancio)' : '#c0392b';
+  const coloreLabel = durataMax >= 25 ? 'var(--verde-label)' : durataMax >= 15 ? 'var(--arancio-label)' : '#c0392b';
+  box.innerHTML = `
+    <div class="concept" style="border-color:${colore}; background: ${durataMax >= 25 ? 'var(--verde-light)' : 'var(--arancio-light)'}">
+      <div class="concept-label" style="color:${coloreLabel}">📅 Il tuo orizzonte temporale</div>
+      <div class="concept-text" style="color: ${durataMax >= 25 ? '#2d5a47' : '#7a4020'}">
+        Con ${eta} anni, puoi chiedere un mutuo di <strong>massimo ${durataMax} anni</strong> 
+        (fino ai tuoi ${etaFine} anni, limite banca 80).<br>
+        ${durataMax < 10 ? '⚠️ La durata massima è molto ridotta: la rata sarà necessariamente alta.' :
+          durataMax < 20 ? 'Hai una buona flessibilità, ma con qualche vincolo sulla durata.' :
+          '✅ Hai piena flessibilità sulla durata del mutuo.'}
+      </div>
+    </div>`;
+}
+
+function selectCointestazione(valore, el) {
+  state.cointestato = valore;
+  document.querySelectorAll('#options_cointestazione .option-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+
+  const fieldsBox = document.getElementById('cointestatario_fields');
+  if (valore === true) {
+    fieldsBox.innerHTML = `
+      <div class="input-group">
+        <div class="input-label">Età del cointestatario</div>
+        <div class="input-row">
+          <input type="number" class="input-field" id="inp_eta2"
+            placeholder="35" min="18" max="85" step="1" value="${state.eta2 || ''}">
+          <span class="input-unit">anni</span>
+        </div>
+      </div>
+      <div class="input-group">
+        <div class="input-label">Reddito netto mensile del cointestatario</div>
+        <div class="input-row">
+          <input type="number" class="input-field" id="inp_reddito2"
+            placeholder="1500" min="0" max="50000" step="100" value="${state.reddito2 || ''}">
+          <span class="input-unit">€/mese</span>
+        </div>
+      </div>
+      <div id="preview_cointestazione"></div>`;
+    const inpEta2 = document.getElementById('inp_eta2');
+    const inpRed2 = document.getElementById('inp_reddito2');
+    inpEta2.addEventListener('input', () => { updateCointestazionePreview(); sincronizzaBtnContinuaIntestatari(); });
+    inpRed2.addEventListener('input', () => { updateCointestazionePreview(); sincronizzaBtnContinuaIntestatari(); });
+    updateCointestazionePreview();
+  } else {
+    fieldsBox.innerHTML = '';
+  }
+  sincronizzaBtnContinuaIntestatari();
+}
+
+function updateCointestazionePreview() {
+  const eta2 = parseInt(document.getElementById('inp_eta2')?.value);
+  const box = document.getElementById('preview_cointestazione');
+  if (!box) return;
+  if (!eta2 || !state.eta) { box.innerHTML = ''; return; }
+  const ETA_MAX = 80;
+  const etaVincolante = Math.max(state.eta, eta2);
+  const durataMax = ETA_MAX - etaVincolante;
+  const chiEPiuAnziano = eta2 > state.eta ? 'il cointestatario' : eta2 === state.eta ? 'entrambi (stessa età)' : 'tu';
+  box.innerHTML = `
+    <div class="concept">
+      <div class="concept-label">📅 Vincolo di durata della coppia</div>
+      <div class="concept-text">
+        Tra ${state.eta} e ${eta2} anni, l'età più vincolante è quella di <strong>${chiEPiuAnziano}</strong> (${etaVincolante} anni). 
+        La durata massima del mutuo scende quindi a <strong>${durataMax} anni</strong> 
+        (rispetto a ${80 - state.eta} anni se fossi da solo).
+      </div>
+    </div>`;
+}
+
+// Valida e salva età, numero di intestatari (e dati del cointestatario). Non avanza lo step.
+function salvaAnagrafica() {
+  const eta = parseInt(document.getElementById('inp_eta')?.value);
+  if (!eta || eta < 18 || eta > 74) {
+    document.getElementById('err_eta').classList.add('visible');
+    return false;
+  }
+  if (state.cointestato === null) return false;
+
+  state.eta = eta;
+  let durataMax = 80 - eta;
+
+  if (state.cointestato === true) {
+    const eta2 = parseInt(document.getElementById('inp_eta2')?.value);
+    const reddito2 = parseFloat(document.getElementById('inp_reddito2')?.value);
+    state.eta2 = eta2 || null;
+    state.reddito2 = reddito2 || null;
+    const etaVinc = getEtaVincolante();
+    if (etaVinc) durataMax = Math.min(durataMax, 80 - etaVinc);
+  } else {
+    state.eta2 = null;
+    state.reddito2 = null;
+  }
+
+  if (state.durata > durataMax) state.durata = durataMax;
+  return true;
+}
+
+function renderDurata(wrap) {
+  const ETA_MAX = 80;
+  const etaVincolante = getEtaVincolante();
+  const durataMax = etaVincolante ? Math.min(30, ETA_MAX - etaVincolante) : 30;
+  const durataMin = 5;
+  // Snap durata corrente al max consentito
+  if (state.durata > durataMax) state.durata = durataMax;
+
+  const rata_ref1 = calcRata(getMutuo(), 3.5, Math.min(20, durataMax));
+  const rata_ref2 = calcRata(getMutuo(), 3.5, durataMax);
+  const etaFine = etaVincolante ? etaVincolante + state.durata : null;
+
+  wrap.innerHTML += `
+    <div class="step-label">Durata</div>
+    <div class="card">
+      <div class="card-question">Per quanti anni vuoi restituire il mutuo?</div>
+      <div class="card-hint">La durata influenza la rata mensile e il totale degli interessi che pagherai.</div>
+      ${etaVincolante ? `<div class="warning">
+        <div class="warning-label">📅 Vincolo età${state.cointestato ? ' (coppia)' : ''}</div>
+        <div class="warning-text">
+          ${state.cointestato ? `L'intestatario più anziano ha ${etaVincolante} anni.` : `Hai ${etaVincolante} anni.`} 
+          Le banche richiedono che il mutuo sia estinto entro i ${ETA_MAX} anni: 
+          puoi scegliere una durata <strong>massima di ${durataMax} anni</strong> 
+          (finireste a ${etaVincolante + durataMax} anni).
+        </div>
+      </div>` : ''}
+      <div class="concept">
+        <div class="concept-label">💡 Durata e rata: il compromesso</div>
+        <div class="concept-text">
+          Durata più lunga = <strong>rata più bassa</strong> ogni mese, 
+          ma <strong>più interessi in totale</strong>.<br>
+          Durata più corta = <strong>rata più alta</strong> ogni mese, 
+          ma <strong>meno interessi totali</strong> e finisci prima.<br><br>
+          Con il tuo mutuo di ${fmtEuro(getMutuo())} al 3,5%:<br>
+          ${durataMax >= 20 ? `· 20 anni → rata circa <strong>${fmtEuro(rata_ref1, 0)}/mese</strong><br>` : ''}
+          · ${durataMax} anni → rata circa <strong>${fmtEuro(rata_ref2, 0)}/mese</strong>
+        </div>
+      </div>
+      <div class="input-group">
+        <div class="input-label">Durata: <strong id="lbl_durata">${state.durata} anni</strong>
+          ${etaVincolante ? `<span style="font-size:12px;color:var(--testo-soft);font-weight:400"> · finiresti a <span id="lbl_eta_fine">${etaVincolante + state.durata}</span> anni</span>` : ''}
+        </div>
+        <div class="slider-wrap">
+          <input type="range" class="slider" id="sl_durata"
+            min="${durataMin}" max="${durataMax}" step="1" value="${state.durata}"
+            oninput="updateDurata(this.value)">
+          <div class="slider-labels">
+            <span>${durataMin} anni</span>
+            <span style="color:var(--arancio-label);font-weight:700">max ${durataMax} anni${etaVincolante ? ` (età ${ETA_MAX})` : ''}</span>
+          </div>
+        </div>
+      </div>
+      <div class="concept" id="preview_durata">
+        <div class="concept-label">📊 Con questa durata</div>
+        <div class="concept-text" id="preview_durata_text"></div>
+      </div>
+      <button class="btn-next" onclick="saveDurata()">Continua →</button>
+    </div>`;
+
+}
+
+function updateDurata(val) {
+  state.durata = parseInt(val);
+  const lbl = document.getElementById('lbl_durata');
+  if (lbl) lbl.textContent = val + ' anni';
+  const etaVincolante = getEtaVincolante();
+  const lblEtaFine = document.getElementById('lbl_eta_fine');
+  if (lblEtaFine && etaVincolante) lblEtaFine.textContent = etaVincolante + state.durata;
+  const rata = calcRata(getMutuo(), 3.5, state.durata);
+  const totale = rata * state.durata * 12;
+  const interessi = totale - getMutuo();
+  const pt = document.getElementById('preview_durata_text');
+  if (pt) {
+    pt.innerHTML = `Rata mensile stimata: <strong>${fmtEuro(rata, 0)}</strong><br>
+    Totale restituito: <strong>${fmtEuro(totale, 0)}</strong><br>
+    Di cui interessi: <strong>${fmtEuro(interessi, 0)}</strong> 
+    (<span style="color: ${interessi/getMutuo() > 0.5 ? 'var(--arancio-label)' : 'var(--verde-label)'}">${fmt(interessi/getMutuo()*100, 0)}% del capitale</span>)
+    ${etaVincolante ? `<br>Finireste di pagare a <strong>${etaVincolante + state.durata} anni</strong>` : ''}`;
+  }
+}
+
+function saveDurata() {
+  nextStep();
+}
+
+function renderTipoTasso(wrap) {
+  wrap.innerHTML += `
+    <div class="step-label">Tipo di tasso</div>
+    <div class="card">
+      <div class="card-question">Preferisci un tasso fisso o variabile?</div>
+      <div class="card-hint">È una delle scelte più importanti del mutuo. Ti spieghiamo entrambe.</div>
+      <div class="concept">
+        <div class="concept-label">💡 Tasso d'interesse: la base</div>
+        <div class="concept-text">
+          Il tasso è la percentuale che la banca ti addebita ogni anno sul debito residuo. 
+          Se hai un mutuo da <strong>200.000€</strong> al <strong>3%</strong>, 
+          il primo anno paghi circa <strong>6.000€ di interessi</strong> (500€ al mese), 
+          che si riducono man mano che rimborsi il capitale.
+        </div>
+      </div>
+      <div class="options" id="options_tasso">
+        <button class="option-btn ${state.tipo_tasso === 'fisso' ? 'selected' : ''}" onclick="selectTasso('fisso', this)">
+          <div class="option-title">🔒 Tasso fisso</div>
+          <div class="option-desc">La percentuale non cambia mai per tutta la durata del mutuo. La rata è sempre la stessa. Più sicurezza, di solito partenza un po' più alta.</div>
+        </button>
+        <button class="option-btn ${state.tipo_tasso === 'variabile' ? 'selected' : ''}" onclick="selectTasso('variabile', this)">
+          <div class="option-title">📈 Tasso variabile</div>
+          <div class="option-desc">La percentuale cambia nel tempo seguendo l'Euribor (un indice europeo). La rata può salire o scendere. Di solito parte più basso, ma c'è incertezza.</div>
+        </button>
+        <button class="option-btn ${state.tipo_tasso === 'misto' ? 'selected' : ''}" onclick="selectTasso('misto', this)">
+          <div class="option-title">🔄 Tasso misto</div>
+          <div class="option-desc">Puoi passare da fisso a variabile (o viceversa) dopo un periodo. Combina flessibilità e protezione, ma i dettagli variano molto da banca a banca.</div>
+        </button>
+      </div>
+      <div id="tasso_spiegazione"></div>
+      <button class="btn-next" id="btn_tasso" onclick="saveTasso()" ${!state.tipo_tasso ? 'disabled' : ''}>Continua →</button>
+    </div>`;
+}
+
+function selectTasso(tipo, el) {
+  state.tipo_tasso = tipo;
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+  document.getElementById('btn_tasso').disabled = false;
+
+  const box = document.getElementById('tasso_spiegazione');
+  if (tipo === 'fisso') {
+    box.innerHTML = `<div class="concept"><div class="concept-label">💡 Come funziona il fisso</div><div class="concept-text">La banca calcola un tasso fisso basandosi sul <strong>tasso IRS</strong> (swap rate) più un suo guadagno chiamato <strong>spread</strong>. Ad esempio: IRS 3% + spread 0,5% = tasso finale 3,5%. Questo numero rimane invariato per sempre.</div></div>`;
+  } else if (tipo === 'variabile') {
+    box.innerHTML = `<div class="concept"><div class="concept-label">💡 Come funziona il variabile</div><div class="concept-text">Il tasso variabile si calcola così: <strong>Euribor + spread</strong>. L'Euribor è un indice che la BCE influenza — sale e scende nel tempo. Lo spread è fisso e rappresenta il guadagno della banca. Se l'Euribor sale, la tua rata sale. Se scende, la tua rata scende.</div></div>`;
+  } else {
+    box.innerHTML = `<div class="concept"><div class="concept-label">💡 Come funziona il misto</div><div class="concept-text">Di solito si parte con un periodo fisso (3-5-10 anni) poi si può scegliere se continuare con fisso o passare a variabile. È utile se vuoi sicurezza all'inizio ma flessibilità dopo.</div></div>`;
+  }
+}
+
+function saveTasso() {
+  if (!state.tipo_tasso) return;
+  nextStep();
+}
+
+function renderTassoDettaglio(wrap) {
+  if (state.tipo_tasso === 'fisso' || state.tipo_tasso === 'misto') {
+    wrap.innerHTML += `
+      <div class="step-label">Il tasso fisso</div>
+      <div class="card">
+        <div class="card-question">Qual è il tasso fisso indicativo?</div>
+        <div class="card-hint">Puoi usare il valore che ti ha comunicato la banca, oppure lasciare il valore di esempio (3,5%).</div>
+        <div class="concept">
+          <div class="concept-label">💡 Tasso nominale vs TAEG</div>
+          <div class="concept-text">
+            Il tasso nominale (TAN) è la percentuale di interessi puri. 
+            Il <strong>TAEG</strong> (Tasso Annuo Effettivo Globale) include anche tutte le spese aggiuntive: 
+            assicurazione, spese di istruttoria, spese di perizia. 
+            Quando confronti due mutui, <strong>confronta sempre il TAEG, non il TAN</strong>.
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="input-label">Tasso fisso annuo (TAN) — %</div>
+          <div class="input-row">
+            <input type="number" class="input-field" id="inp_tasso_fisso"
+              value="${state.tasso_fisso}" min="0.5" max="15" step="0.1"
+              oninput="updateTassoFissoPreview()">
+            <span class="input-unit">% annuo</span>
+          </div>
+        </div>
+        <div class="concept" id="preview_tasso_fisso"></div>
+        <button class="btn-next" id="btn_tasso_fisso" onclick="saveTassoFisso()" disabled>Continua →</button>
+      </div>`;
+  } else {
+    wrap.innerHTML += `
+      <div class="step-label">Il tasso variabile</div>
+      <div class="card">
+        <div class="card-question">Euribor e spread del tuo mutuo variabile</div>
+        <div class="card-hint">Il tasso variabile si calcola come Euribor + spread della banca.</div>
+        <div class="concept">
+          <div class="concept-label">💡 Euribor: cos'è davvero</div>
+          <div class="concept-text">
+            L'<strong>Euribor</strong> (Euro Interbank Offered Rate) è il tasso a cui le banche europee 
+            si prestano denaro tra loro. È fissato ogni giorno e dipende dalle decisioni della 
+            <strong>Banca Centrale Europea (BCE)</strong>. 
+            Quando la BCE alza i tassi per frenare l'inflazione, l'Euribor sale — 
+            e la tua rata variabile sale con lui.
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="input-label">Euribor attuale (indicativo) — %</div>
+          <div class="input-row">
+            <input type="number" class="input-field" id="inp_euribor"
+              value="${state.euribor}" min="0" max="15" step="0.1"
+              oninput="updateVariabilePreview()">
+            <span class="input-unit">%</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="input-label">Spread della banca — %</div>
+          <div class="input-row">
+            <input type="number" class="input-field" id="inp_spread"
+              value="${state.spread}" min="0.1" max="5" step="0.1"
+              oninput="updateVariabilePreview()">
+            <span class="input-unit">%</span>
+          </div>
+        </div>
+        <div class="concept" id="preview_variabile"></div>
+        <button class="btn-next" id="btn_tasso_variabile" onclick="saveTassoVariabile()" disabled>Continua →</button>
+      </div>`;
+  }
+}
+
+function updateTassoFissoPreview() {
+  const btn = document.getElementById('btn_tasso_fisso');
+  if (btn) btn.disabled = !campoNumericoValido('inp_tasso_fisso');
+
+  const t = parseFloat(document.getElementById('inp_tasso_fisso')?.value);
+  if (!t) return;
+  state.tasso_fisso = t;
+  const rata = calcRata(getMutuo(), t, state.durata);
+  const totale = rata * state.durata * 12;
+  const interessi = totale - getMutuo();
+  const pv = document.getElementById('preview_tasso_fisso');
+  if (pv) pv.innerHTML = `<div class="concept-label">📊 Con questo tasso</div><div class="concept-text">Rata mensile: <strong>${fmtEuro(rata,0)}</strong><br>Interessi totali: <strong>${fmtEuro(interessi,0)}</strong><br>Totale rimborsato: <strong>${fmtEuro(totale,0)}</strong></div>`;
+}
+
+function saveTassoFisso() {
+  const t = parseFloat(document.getElementById('inp_tasso_fisso').value);
+  state.tasso_fisso = t || 3.5;
+  nextStep();
+}
+
+function updateVariabilePreview() {
+  const btn = document.getElementById('btn_tasso_variabile');
+  if (btn) btn.disabled = !(campoNumericoValido('inp_euribor') && campoNumericoValido('inp_spread'));
+
+  const e = parseFloat(document.getElementById('inp_euribor')?.value);
+  const s = parseFloat(document.getElementById('inp_spread')?.value);
+  if (!e || !s) return;
+  state.euribor = e; state.spread = s;
+  const tasso = e + s;
+  const rata = calcRata(getMutuo(), tasso, state.durata);
+  const totale = rata * state.durata * 12;
+  const interessi = totale - getMutuo();
+  const pv = document.getElementById('preview_variabile');
+  if (pv) pv.innerHTML = `<div class="concept-label">📊 Con tasso attuale ${fmt(tasso,2)}%</div><div class="concept-text">Euribor ${fmt(e,2)}% + spread ${fmt(s,2)}% = tasso <strong>${fmt(tasso,2)}%</strong><br>Rata mensile: <strong>${fmtEuro(rata,0)}</strong><br>Interessi totali stimati: <strong>${fmtEuro(interessi,0)}</strong><br><span style="color:#7a4020">⚠️ Il tasso variabile può cambiare nel tempo: questa è solo una stima di oggi.</span></div>`;
+}
+
+function saveTassoVariabile() {
+  const e = parseFloat(document.getElementById('inp_euribor').value);
+  const s = parseFloat(document.getElementById('inp_spread').value);
+  state.euribor = e || 3.8;
+  state.spread = s || 1.2;
+  nextStep();
+}
+
+function renderRiepilogo(wrap) {
+  const mutuo = getMutuo();
+  const ltv = getLTV();
+  const tasso = state.tipo_tasso === 'variabile' ? getTassoVariabile() : state.tasso_fisso;
+  const rata = calcRata(mutuo, tasso, state.durata);
+  const totale = rata * state.durata * 12;
+  const interessi = totale - mutuo;
+
+  const datiPeriodi = calcolaDatiAmmortamentoPeriodi(mutuo, tasso, state.durata);
+  const tabellaHtml = buildTabellaRate(datiPeriodi);
+
+  wrap.innerHTML += `
+    <div class="step-label">${state.nome ? `Il riepilogo di ${state.nome}` : 'Il tuo riepilogo'}</div>
+    <div class="result-card">
+      <div class="result-title">Rata mensile stimata</div>
+      <div class="result-big">${fmtEuro(rata,0)}</div>
+      <div class="result-sub">per ${state.durata} anni · ${fmt(state.durata*12,0)} rate totali</div>
+      <div class="result-grid">
+        <div class="result-item">
+          <div class="result-item-label">Casa</div>
+          <div class="result-item-value">${fmtEuro(state.valore_immobile,0)}</div>
+        </div>
+        <div class="result-item">
+          <div class="result-item-label">Mutuo richiesto</div>
+          <div class="result-item-value">${fmtEuro(mutuo,0)}</div>
+        </div>
+        <div class="result-item">
+          <div class="result-item-label">Tasso (${state.tipo_tasso})</div>
+          <div class="result-item-value green">${fmt(tasso,2)}%</div>
+        </div>
+        <div class="result-item">
+          <div class="result-item-label">LTV${state.garanzia_consap && ltv > 80 ? ' (Consap)' : ''}</div>
+          <div class="result-item-value ${ltv > 80 && !state.garanzia_consap ? 'orange' : 'green'}">${fmt(ltv,1)}%</div>
+        </div>
+        <div class="result-item">
+          <div class="result-item-label">Interessi totali</div>
+          <div class="result-item-value orange">${fmtEuro(interessi,0)}</div>
+        </div>
+        <div class="result-item">
+          <div class="result-item-label">Totale rimborsato</div>
+          <div class="result-item-value">${fmtEuro(totale,0)}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-question" style="font-size:15px;">Come si distribuisce ogni rata</div>
+      <div class="card-hint">All'inizio paghi più interessi. Col tempo, la quota di capitale cresce.</div>
+      <div class="chart-container">
+        <canvas id="chartRata" role="img" aria-label="Grafico a barre impilate: quota capitale e quota interessi pagati in ciascun anno del mutuo, in euro"></canvas>
+      </div>
+      <div class="chart-axis-hint">
+        <strong>Asse orizzontale:</strong> gli anni del mutuo, raggruppati in ${datiPeriodi.length} periodi.
+        <strong>Asse verticale:</strong> quanto paghi in totale in un anno di quel periodo (€), diviso tra la parte che riduce il debito (quota capitale) e la parte che è il costo del prestito (quota interessi). Passa il mouse su una barra per i valori esatti.
+      </div>
+      ${tabellaHtml}
+      <div class="concept">
+        <div class="concept-label">💡 Ammortamento alla francese</div>
+        <div class="concept-text">
+          In Italia quasi tutti i mutui usano il metodo francese: la <strong>rata è sempre uguale</strong>,
+          ma cambia cosa c'è dentro. All'inizio è piena di interessi e quasi niente capitale.
+          Con gli anni si inverte: paghi sempre meno interessi e sempre più capitale.
+          Ecco perché conviene <strong>non estinguere nei primi anni</strong>:
+          hai già pagato tanti interessi ma restituito poco capitale.
+        </div>
+      </div>
+    </div>
+    <button class="btn-next" onclick="nextStep()">Vedi il confronto →</button>`;
+
+  disegnaGraficoRata(datiPeriodi);
+}
+
+// Divide il piano di ammortamento in un numero ridotto di periodi (max 6) per
+// riepilogo e grafico: per ciascun periodo calcola i totali annui di capitale
+// e interessi, la media mensile all'interno del periodo, e il debito residuo
+// alla fine del periodo. Stessa logica di calcolo rata/interesse mensile del
+// resto del simulatore (vedi calcRata), qui solo aggregata per periodo.
+function calcolaDatiAmmortamentoPeriodi(capitale, tasso_annuo, anni) {
+  const n = anni * 12;
+  const r = tasso_annuo / 100 / 12;
+  const rata = calcRata(capitale, tasso_annuo, anni);
+  const periodi = Math.min(anni, 6);
+  const step = Math.floor(n / periodi);
+
+  const dataPoints = [];
+  let s = capitale;
+  for (let i = 0; i < periodi; i++) {
+    let int_period = 0, cap_period = 0;
+    const from = i * step;
+    const to = Math.min(from + step, n);
+    const mesi = to - from;
+    for (let m = from; m < to; m++) {
+      const int_m = s * r;
+      const cap_m = rata - int_m;
+      int_period += int_m;
+      cap_period += cap_m;
+      s -= cap_m;
+    }
+    dataPoints.push({
+      label: `Anno ${from / 12 + 1}`,
+      mesi,
+      cap: cap_period,
+      int: int_period,
+      total: int_period + cap_period,
+      rataMensile: rata,
+      capMedioMensile: cap_period / mesi,
+      intMedioMensile: int_period / mesi,
+      debitoResiduoFine: Math.max(s, 0),
+    });
+  }
+  return dataPoints;
+}
+
+function buildTabellaRate(dataPoints) {
+  const righe = dataPoints.map(d => `
+    <tr>
+      <td>${d.label}</td>
+      <td>${fmtEuro(d.rataMensile, 0)}</td>
+      <td class="col-capitale">${fmtEuro(d.capMedioMensile, 0)}</td>
+      <td class="col-interessi">${fmtEuro(d.intMedioMensile, 0)}</td>
+      <td>${fmtEuro(d.debitoResiduoFine, 0)}</td>
+    </tr>`).join('');
+
+  return `
+    <div class="tabella-wrap">
+      <table class="tabella-rate">
+        <thead>
+          <tr>
+            <th>Periodo</th>
+            <th>Rata mensile</th>
+            <th>Quota capitale</th>
+            <th>Quota interessi</th>
+            <th>Debito residuo</th>
+          </tr>
+        </thead>
+        <tbody>${righe}</tbody>
+      </table>
+    </div>
+    <div class="tabella-caption">La rata mensile resta uguale per tutta la durata del mutuo; "quota capitale" e "quota interessi" sono la media mensile all'interno di ciascun periodo (cambiano leggermente mese per mese). "Debito residuo" è quanto manca da restituire alla fine del periodo.</div>`;
+}
+
+let chartRataInstance = null;
+
+function coloreCSS(nomeVar) {
+  return getComputedStyle(document.documentElement).getPropertyValue(nomeVar).trim();
+}
+
+function disegnaGraficoRata(dataPoints) {
+  const canvas = document.getElementById('chartRata');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  if (chartRataInstance) {
+    chartRataInstance.destroy();
+    chartRataInstance = null;
+  }
+
+  chartRataInstance = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: dataPoints.map(d => d.label),
+      datasets: [
+        { label: 'Quota capitale', data: dataPoints.map(d => Math.round(d.cap)), backgroundColor: coloreCSS('--blu-testo'), borderRadius: 4 },
+        { label: 'Quota interessi', data: dataPoints.map(d => Math.round(d.int)), backgroundColor: coloreCSS('--arancio'), borderRadius: 4 },
+      ]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: coloreCSS('--testo-soft'), boxWidth: 10, font: { size: 11 } } },
+        tooltip: { callbacks: { label: c => `${c.dataset.label}: ${fmtEuro(c.parsed.y, 0)}` } }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          title: { display: true, text: 'Anno del mutuo (periodi raggruppati)', color: coloreCSS('--testo-soft'), font: { size: 11, weight: 600 } },
+          ticks: { color: coloreCSS('--testo-soft'), font: { size: 11 } },
+          grid: { display: false }
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          title: { display: true, text: 'Importo pagato in un anno (€)', color: coloreCSS('--testo-soft'), font: { size: 11, weight: 600 } },
+          ticks: { color: coloreCSS('--testo-soft'), font: { size: 11 }, callback: v => fmtEuro(v, 0) },
+          grid: { color: coloreCSS('--grigio-mid') }
+        }
+      }
+    }
+  });
+}
+
+// Il canvas non reagisce da solo al cambio di tema (i colori delle barre sono
+// stringhe già risolte al momento del disegno): quando si cambia tema mentre
+// il grafico è visibile, ne aggiorniamo i colori senza ricrearlo da zero.
+function aggiornaTemaGraficoRata() {
+  if (!chartRataInstance) return;
+  chartRataInstance.data.datasets[0].backgroundColor = coloreCSS('--blu-testo');
+  chartRataInstance.data.datasets[1].backgroundColor = coloreCSS('--arancio');
+  const testoSoft = coloreCSS('--testo-soft');
+  const grigioMid = coloreCSS('--grigio-mid');
+  chartRataInstance.options.plugins.legend.labels.color = testoSoft;
+  chartRataInstance.options.scales.x.title.color = testoSoft;
+  chartRataInstance.options.scales.x.ticks.color = testoSoft;
+  chartRataInstance.options.scales.y.title.color = testoSoft;
+  chartRataInstance.options.scales.y.ticks.color = testoSoft;
+  chartRataInstance.options.scales.y.grid.color = grigioMid;
+  chartRataInstance.update('none');
+}
+
+// ─── PUNTEGGIO DI SALUTE DEL MUTUO ──────────────────────────────────────────
+function calcolaPunteggioSalute() {
+  const mutuo = getMutuo();
+  const ltv = getLTV();
+  const tasso = state.tipo_tasso === 'variabile' ? getTassoVariabile() : state.tasso_fisso;
+  const rata = calcRata(mutuo, tasso, state.durata);
+  const redditoTot = getRedditoTotale();
+  const etaVinc = getEtaVincolante();
+
+  // Pilastro 1: LTV (0-25 pt)
+  let pLTV, pLTVdesc;
+  if (ltv <= 50) { pLTV = 25; pLTVdesc = 'eccellente'; }
+  else if (ltv <= 70) { pLTV = 20; pLTVdesc = 'molto buono'; }
+  else if (ltv <= 80) { pLTV = 12; pLTVdesc = 'nella norma'; }
+  else { pLTV = 4; pLTVdesc = state.garanzia_consap ? 'elevato, coperto dalla Garanzia Statale Consap' : 'elevato'; }
+
+  // Pilastro 2: Rata/Reddito (0-30 pt) — 15/30 neutro se dato mancante
+  let pRedd, pReddDesc, reddMancante = !redditoTot;
+  if (reddMancante) { pRedd = 15; pReddDesc = 'dato non inserito'; }
+  else {
+    const pct = rata / redditoTot * 100;
+    if (pct <= 25) { pRedd = 30; pReddDesc = 'molto sostenibile'; }
+    else if (pct <= 30) { pRedd = 25; pReddDesc = 'sostenibile'; }
+    else if (pct <= 35) { pRedd = 14; pReddDesc = 'al limite'; }
+    else { pRedd = 3; pReddDesc = 'a rischio'; }
+  }
+
+  // Pilastro 3: Margine età (0-25 pt) — 15/25 neutro se età mancante
+  let pEta, pEtaDesc, etaMancante = !etaVinc;
+  if (etaMancante) { pEta = 15; pEtaDesc = 'dato non inserito'; }
+  else {
+    const durataMax = 80 - etaVinc;
+    const margine = durataMax - state.durata;
+    if (margine >= 10) { pEta = 25; pEtaDesc = 'ampio margine'; }
+    else if (margine >= 5) { pEta = 19; pEtaDesc = 'buon margine'; }
+    else if (margine >= 1) { pEta = 11; pEtaDesc = 'margine ridotto'; }
+    else { pEta = 5; pEtaDesc = 'al limite massimo'; }
+  }
+
+  // Pilastro 4: Resilienza al rialzo dei tassi (0-20 pt) — stress test +2 punti se variabile
+  let pStress, pStressDesc;
+  if (reddMancante) { pStress = 10; pStressDesc = 'dato non inserito'; }
+  else {
+    const tassoStress = state.tipo_tasso === 'variabile' ? tasso + 2 : tasso;
+    const rataStress = calcRata(mutuo, tassoStress, state.durata);
+    const pctStress = rataStress / redditoTot * 100;
+    if (pctStress <= 30) { pStress = 20; pStressDesc = 'solida anche con tassi in salita'; }
+    else if (pctStress <= 35) { pStress = 14; pStressDesc = 'reggerebbe con qualche margine'; }
+    else if (pctStress <= 42) { pStress = 7; pStressDesc = 'in difficoltà se i tassi salgono'; }
+    else { pStress = 2; pStressDesc = 'molto vulnerabile a un rialzo tassi'; }
+  }
+
+  const totale = pLTV + pRedd + pEta + pStress;
+
+  let verdetto, colore, bg;
+  if (totale >= 80) { verdetto = 'Profilo solido'; colore = 'var(--verde-label)'; bg = 'var(--verde-light)'; }
+  else if (totale >= 60) { verdetto = 'Profilo nella norma'; colore = 'var(--blu-verdict)'; bg = '#eaf2fb'; }
+  else if (totale >= 40) { verdetto = 'Profilo da rafforzare'; colore = 'var(--arancio-label)'; bg = 'var(--arancio-light)'; }
+  else { verdetto = 'Profilo fragile'; colore = '#c0392b'; bg = 'var(--rosso-light)'; }
+
+  return {
+    totale, verdetto, colore, bg,
+    pillars: [
+      { nome: 'Rapporto prestito/valore (LTV)', icona: '🏦', punti: pLTV, max: 25, desc: pLTVdesc },
+      { nome: 'Rata rispetto al reddito', icona: '💶', punti: pRedd, max: 30, desc: pReddDesc, mancante: reddMancante },
+      { nome: 'Margine sull\'età limite', icona: '📅', punti: pEta, max: 25, desc: pEtaDesc, mancante: etaMancante },
+      { nome: 'Tenuta a un rialzo dei tassi', icona: '📈', punti: pStress, max: 20, desc: pStressDesc, mancante: reddMancante },
+    ]
+  };
+}
+
+function suggerimentoMiglioramento(score) {
+  // Trova il pilastro più debole (in proporzione al suo massimo) e suggerisce un'azione concreta
+  const pesati = score.pillars.map(p => ({...p, ratio: p.punti / p.max}));
+  pesati.sort((a,b) => a.ratio - b.ratio);
+  const debole = pesati[0];
+
+  if (debole.mancante) {
+    return `Inserisci il dato sul reddito o sull'età nei passi precedenti: senza queste informazioni il punteggio resta parziale e non riflette la tua situazione reale.`;
+  }
+  if (debole.nome.includes('LTV')) {
+    const mutuo = getMutuo();
+    const targetLTV70 = state.valore_immobile * 0.70;
+    const accontoNecessario = state.valore_immobile - targetLTV70;
+    const extra = Math.max(0, accontoNecessario - state.acconto);
+    return extra > 0
+      ? `Aumentando l'acconto di circa <strong>${fmtEuro(extra,0)}</strong> porteresti l'LTV sotto il 70%, migliorando sensibilmente le condizioni offerte dalle banche.`
+      : `Il tuo LTV è già in una fascia solida.`;
+  }
+  if (debole.nome.includes('reddito')) {
+    return `Riducendo la durata o aumentando l'acconto abbasseresti la rata mensile rispetto al reddito. In alternativa, un secondo intestatario con reddito proprio (mutuo cointestato) alzerebbe il reddito di riferimento.`;
+  }
+  if (debole.nome.includes('età')) {
+    const etaVinc = getEtaVincolante();
+    const durataMax = 80 - etaVinc;
+    const riduzione = state.durata - Math.max(5, durataMax - 8);
+    return riduzione > 0
+      ? `Il margine rispetto al limite d'età è ridotto. Valuta se accorciare la durata di qualche anno, se la rata risultante resta sostenibile.`
+      : `Il margine sull'età è già adeguato.`;
+  }
+  if (debole.nome.includes('rialzo')) {
+    return state.tipo_tasso === 'variabile'
+      ? `Il tasso variabile rende la rata sensibile ai rialzi futuri. Se preferisci maggiore prevedibilità, valuta un tasso fisso o misto.`
+      : `Verifica che la rata lasci un margine di sicurezza rispetto al reddito, in caso di imprevisti.`;
+  }
+  return `Il tuo profilo è già equilibrato su tutti i fronti principali.`;
+}
+
+function renderPunteggioSalute(wrap) {
+  const score = calcolaPunteggioSalute();
+  const suggerimento = suggerimentoMiglioramento(score);
+
+  // Angolo della lancetta: da -90° (0 punti) a +90° (100 punti) su un semicerchio
+  const angolo = -90 + (score.totale / 100) * 180;
+  const rad = angolo * Math.PI / 180;
+  const cx = 140, cy = 130, r = 100;
+  const needleX = cx + r * 0.8 * Math.cos(rad);
+  const needleY = cy + r * 0.8 * Math.sin(rad);
+
+  // Arco di sfondo colorato a segmenti (rosso-arancio-blu-verde)
+  function arcPath(startDeg, endDeg, radius) {
+    const s = (startDeg) * Math.PI/180, e = (endDeg) * Math.PI/180;
+    const x1 = cx + radius*Math.cos(s), y1 = cy + radius*Math.sin(s);
+    const x2 = cx + radius*Math.cos(e), y2 = cy + radius*Math.sin(e);
+    return `M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${radius} ${radius} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+  }
+
+  wrap.innerHTML += `
+    <div class="step-label">Punteggio di salute del mutuo</div>
+    <div class="card">
+      <div class="card-question">Quanto è solido questo profilo, nel complesso?</div>
+      <div class="card-hint">Un punteggio che combina LTV, sostenibilità della rata, margine sull'età e resistenza a un aumento dei tassi. Non è un giudizio della banca: è una sintesi per orientarti.</div>
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 280 150">
+          <path d="${arcPath(-90,-45,100)}" stroke="#c0392b" stroke-width="16" fill="none" stroke-linecap="round" transform="translate(0,0)" />
+          <path d="${arcPath(-45,0,100)}" stroke="#e8834a" stroke-width="16" fill="none" stroke-linecap="round" />
+          <path d="${arcPath(0,45,100)}" stroke="#4a80c4" stroke-width="16" fill="none" stroke-linecap="round" />
+          <path d="${arcPath(45,90,100)}" stroke="#4a9b7f" stroke-width="16" fill="none" stroke-linecap="round" />
+          <line x1="${cx}" y1="${cy}" x2="${needleX.toFixed(1)}" y2="${needleY.toFixed(1)}" stroke="var(--blu)" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="${cx}" cy="${cy}" r="7" fill="var(--blu)"/>
+        </svg>
+        <div class="gauge-score" style="color:${score.colore}">${score.totale}<span style="font-size:18px;color:var(--testo-soft);font-weight:600">/100</span></div>
+        <div class="gauge-verdict" style="color:${score.colore}">${score.verdetto}</div>
+        <div class="gauge-sub">${state.nome ? `Il profilo di ${state.nome}` : 'Il tuo profilo'} combina 4 fattori chiave</div>
+      </div>
+      <div class="pillar-list">
+        ${score.pillars.map(p => {
+          const pct = Math.round(p.punti/p.max*100);
+          const colore = pct >= 80 ? 'var(--verde)' : pct >= 55 ? '#4a80c4' : pct >= 30 ? 'var(--arancio)' : '#c0392b';
+          const coloreTesto = pct >= 80 ? 'var(--verde-label)' : pct >= 55 ? 'var(--blu-verdict)' : pct >= 30 ? 'var(--arancio-label)' : '#c0392b';
+          return `<div class="pillar-row">
+            <div class="pillar-icon">${p.icona}</div>
+            <div class="pillar-info">
+              <div class="pillar-name">${p.nome} ${p.mancante ? '<span style="color:var(--testo-soft);font-weight:400">(dato mancante)</span>' : `— <span style="color:${coloreTesto}">${p.desc}</span>`}</div>
+              <div class="pillar-track"><div class="pillar-fill" style="width:${pct}%;background:${colore}"></div></div>
+            </div>
+            <div class="pillar-score" style="color:${coloreTesto}">${p.punti}/${p.max}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="suggerimento-box">
+        <div class="suggerimento-label">💡 Cosa migliorerebbe di più il punteggio</div>
+        <div class="suggerimento-text">${suggerimento}</div>
+      </div>
+      <div class="warning" style="margin-top:12px">
+        <div class="warning-label">⚠️ Attenzione</div>
+        <div class="warning-text">Questo punteggio è un modello educativo semplificato, non l'algoritmo reale di nessuna banca. Ogni istituto valuta con criteri propri, spesso più complessi.</div>
+      </div>
+      <button class="btn-next" onclick="nextStep()">Continua →</button>
+    </div>`;
+}
+
+function renderConfronto(wrap) {
+  const mutuo = getMutuo();
+  const tassoF = state.tasso_fisso;
+  const tassoV = getTassoVariabile();
+  const durata = state.durata;
+
+  const rataF = calcRata(mutuo, tassoF, durata);
+  const rataV = calcRata(mutuo, tassoV, durata);
+  const totaleF = rataF * durata * 12;
+  const totaleV = rataV * durata * 12;
+  const intF = totaleF - mutuo;
+  const intV = totaleV - mutuo;
+
+  const fissoMigliore = tassoF <= tassoV;
+
+  wrap.innerHTML += `
+    <div class="step-label">Confronto — Fisso vs Variabile</div>
+    <div class="card">
+      <div class="card-question">Fisso o variabile: cosa cambia davvero?</div>
+      <div class="card-hint">Con i tuoi dati, ecco come si confrontano le due opzioni oggi.</div>
+    </div>
+    <div class="comparison">
+      <div class="comp-col-header">
+        <div style="flex:1;font-size:12px;font-weight:600;color:var(--testo-soft)">Voce</div>
+        <div class="col-h a">🔒 Fisso</div>
+        <div class="col-h b">📈 Variabile</div>
+      </div>
+      <div class="comparison-row">
+        <div class="comp-label">Tasso attuale</div>
+        <div class="comp-a">${fmt(tassoF,2)}%</div>
+        <div class="comp-b">${fmt(tassoV,2)}%</div>
+      </div>
+      <div class="comparison-row">
+        <div class="comp-label">Rata mensile</div>
+        <div class="comp-a">${fmtEuro(rataF,0)}</div>
+        <div class="comp-b">${fmtEuro(rataV,0)}</div>
+        <div class="comp-tag ${fissoMigliore ? 'tag-neutral' : 'tag-better'}">${fissoMigliore ? 'più alta' : 'più bassa'}</div>
+      </div>
+      <div class="comparison-row">
+        <div class="comp-label">Interessi totali stimati</div>
+        <div class="comp-a">${fmtEuro(intF,0)}</div>
+        <div class="comp-b">${fmtEuro(intV,0)}</div>
+        <div class="comp-tag ${intF < intV ? 'tag-better' : 'tag-worse'}">${intF < intV ? 'meno' : 'più'}</div>
+      </div>
+      <div class="comparison-row">
+        <div class="comp-label">Totale rimborsato</div>
+        <div class="comp-a">${fmtEuro(totaleF,0)}</div>
+        <div class="comp-b">${fmtEuro(totaleV,0)}</div>
+      </div>
+      <div class="comparison-row">
+        <div class="comp-label">Certezza della rata</div>
+        <div class="comp-a" style="color:var(--verde-label)">✅ Sì</div>
+        <div class="comp-b" style="color:var(--arancio-label)">⚠️ No</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="concept">
+        <div class="concept-label">💡 Come scegliere davvero</div>
+        <div class="concept-text">
+          Non esiste la scelta giusta in assoluto. Dipende da:<br><br>
+          · <strong>Quanto rischio puoi tollerare?</strong> Se un aumento della rata di 200-300€/mese 
+          metterebbe in difficoltà il tuo bilancio, il fisso è più prudente.<br><br>
+          · <strong>Quanto durerà il mutuo?</strong> Su orizzonti lunghi (25-30 anni), 
+          i tassi variabili tendono a bilanciare salite e discese.<br><br>
+          · <strong>Dove sono i tassi oggi?</strong> Con tassi alti conviene spesso aspettare o scegliere il variabile 
+          scommettendo su una discesa. Con tassi bassi, il fisso "blocca" la convenienza.
+        </div>
+      </div>
+      <div class="warning">
+        <div class="warning-label">⚠️ Sul variabile: lo scenario peggiore</div>
+        <div class="warning-text">Se l'Euribor salisse di 2 punti, la tua rata variabile passerebbe da <strong>${fmtEuro(rataV,0)}</strong> a circa <strong>${fmtEuro(calcRata(mutuo, tassoV+2, durata),0)}</strong> al mese. Sei in grado di sostenere questo aumento?</div>
+      </div>
+    </div>
+    <button class="btn-next" onclick="nextStep()">Esplora le combinazioni →</button>`;
+}
+
+function updateRedditoPreview() {
+  const reddito1 = parseFloat(document.getElementById('inp_reddito')?.value);
+  const box = document.getElementById('preview_reddito');
+  if (!box || !reddito1 || reddito1 < 500) { if(box) box.innerHTML=''; return; }
+  const reddito2 = state.cointestato ? (state.reddito2 || 0) : 0;
+  const reddito = reddito1 + reddito2;
+  const mutuo = getMutuo();
+  const tasso = state.tasso_fisso || 3.5;
+  const rata = calcRata(mutuo, tasso, state.durata);
+  const pct = rata / reddito * 100;
+  const soglia30 = reddito * 0.30;
+  const soglia35 = reddito * 0.35;
+  let colore, coloreTesto, testo, bg;
+  if (pct <= 30) { colore = 'var(--verde)'; coloreTesto = 'var(--verde-label)'; bg = 'var(--verde-light)'; testo = `✅ <strong>Ottimo</strong>: la rata rappresenta il ${fmt(pct,1)}% del reddito${state.cointestato ? ' complessivo' : ''}. Sei ben sotto la soglia del 30%.`; }
+  else if (pct <= 35) { colore = 'var(--arancio)'; coloreTesto = 'var(--arancio-label)'; bg = 'var(--arancio-light)'; testo = `⚠️ <strong>Borderline</strong>: la rata è il ${fmt(pct,1)}% del reddito${state.cointestato ? ' complessivo' : ''}. Molte banche accettano fino al 35%, ma il margine è stretto.`; }
+  else { colore = '#c0392b'; coloreTesto = '#c0392b'; bg = 'var(--rosso-light)'; testo = `🔴 <strong>Attenzione</strong>: la rata è il ${fmt(pct,1)}% del reddito${state.cointestato ? ' complessivo' : ''}. Supera la soglia del 35%: la banca potrebbe non concedere il mutuo o chiedere un garante.`; }
+  const fillW = Math.min(pct / 50 * 100, 100);
+  const marker30 = 30/50*100;
+  const marker35 = 35/50*100;
+  box.innerHTML = `
+    ${state.cointestato ? `<div class="concept" style="margin-bottom:8px">
+      <div class="concept-label">👥 Reddito complessivo della coppia</div>
+      <div class="concept-text">${fmtEuro(reddito1,0)} (tuo) + ${fmtEuro(reddito2,0)} (cointestatario) = <strong>${fmtEuro(reddito,0)}/mese</strong></div>
+    </div>` : ''}
+    <div class="meter-wrap">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;font-weight:600;color:var(--testo-soft)">
+        <span>Rata stimata: <strong style="color:var(--blu-testo)">${fmtEuro(rata,0)}/mese</strong></span>
+        <span style="color:${coloreTesto};font-weight:800">${fmt(pct,1)}% del reddito</span>
+      </div>
+      <div class="meter-track">
+        <div class="meter-fill" style="width:${fillW}%;background:${colore}"></div>
+        <div class="meter-marker" style="left:${marker30}%" title="30%"></div>
+        <div class="meter-marker" style="left:${marker35}%" title="35%"></div>
+      </div>
+      <div class="meter-labels"><span>0%</span><span style="color:var(--verde-label)">30%</span><span style="color:var(--arancio-label)">35%</span><span>50%+</span></div>
+    </div>
+    <div class="concept" style="border-color:${colore};background:${bg}">
+      <div class="concept-text" style="color:${pct<=30?'#2d5a47':pct<=35?'#7a4020':'#7a1010'}">${testo}<br><br>
+      Per stare sotto il 30% con il tuo reddito, la rata massima ideale è <strong>${fmtEuro(soglia30,0)}/mese</strong>.<br>
+      Questo corrisponde a un mutuo di circa <strong>${fmtEuro(calcMutuoDaRata(soglia30, tasso, state.durata),0)}</strong> alle condizioni attuali.</div>
+    </div>`;
+}
+
+function calcMutuoDaRata(rata_mensile, tasso_annuo, anni) {
+  if (tasso_annuo === 0) return rata_mensile * anni * 12;
+  const r = tasso_annuo / 100 / 12;
+  const n = anni * 12;
+  return rata_mensile * (Math.pow(1+r,n) - 1) / (r * Math.pow(1+r,n));
+}
+
+function saveIntestatari() {
+  if (!salvaAnagrafica()) return;
+  const reddito = parseFloat(document.getElementById('inp_reddito')?.value);
+  if (!reddito || reddito < 500) { document.getElementById('err_reddito').classList.add('visible'); return; }
+  state.reddito = reddito;
+  nextStep();
+}
+
+// Verifica se tutti i campi obbligatori dello step "Intestatari" sono popolati
+// correttamente, e abilita/disabilita di conseguenza il pulsante Continua.
+function sincronizzaBtnContinuaIntestatari() {
+  const btn = document.getElementById('btn_continua_intestatari');
+  if (!btn) return;
+
+  const eta = parseInt(document.getElementById('inp_eta')?.value);
+  const etaValida = eta >= 18 && eta <= 74;
+  const reddito = parseFloat(document.getElementById('inp_reddito')?.value);
+  const redditoValido = reddito >= 500;
+
+  let completo = etaValida && redditoValido && state.cointestato !== null;
+
+  if (completo && state.cointestato === true) {
+    const eta2 = parseInt(document.getElementById('inp_eta2')?.value);
+    const reddito2El = document.getElementById('inp_reddito2');
+    const reddito2 = parseFloat(reddito2El?.value);
+    completo = eta2 >= 18 && eta2 <= 85 && reddito2El?.value !== '' && reddito2 >= 0;
+  }
+
+  btn.disabled = !completo;
+}
+
+// ─── COSTI INIZIALI ─────────────────────────────────────────────────────────
+function renderCostiIniziali(wrap) {
+  wrap.innerHTML += `
+    <div class="step-label">Costi iniziali — Cosa devi avere in tasca</div>
+    <div class="card">
+      <div class="card-question">Il giorno del rogito servono più soldi dell'acconto</div>
+      <div class="card-hint">Molti comprano casa pensando di dover avere solo l'acconto. In realtà ci sono altri costi obbligatori. Puoi modificare le stime qui sotto.</div>
+      <div class="concept">
+        <div class="concept-label">💡 Perché la banca non copre questi costi</div>
+        <div class="concept-text">
+          Il mutuo copre solo il prezzo della casa${state.garanzia_consap ? ', anche fino al 100% con la Garanzia Statale che hai indicato' : ' (di norma fino all\'80%)'}.
+          Tutti i costi accessori — notaio, imposte, perizia —
+          sono <strong>a tuo carico</strong> e vanno pagati subito,
+          anche prima di ricevere le chiavi.
+        </div>
+      </div>
+      <div class="costi-grid">
+        <div class="costo-row">
+          <div class="costo-icon">🏠</div>
+          <div class="costo-info">
+            <div class="costo-nome">Acconto (già calcolato)</div>
+            <div class="costo-desc">La parte del prezzo che paghi tu</div>
+          </div>
+          <div class="costo-input-wrap">
+            <span style="font-size:15px;font-weight:800;color:var(--blu-testo)">${fmtEuro(state.acconto,0)}</span>
+          </div>
+        </div>
+        <div class="costo-row">
+          <div class="costo-icon">📋</div>
+          <div class="costo-info">
+            <div class="costo-nome">Istruttoria bancaria</div>
+            <div class="costo-desc">Spese per l'analisi della pratica</div>
+          </div>
+          <div class="costo-input-wrap">
+            <input type="number" class="costo-inp" id="inp_istruttoria" value="${state.spese_istruttoria}" min="0" max="5000" step="50">
+            <span class="costo-unit">€</span>
+          </div>
+        </div>
+        <div class="costo-row">
+          <div class="costo-icon">🔍</div>
+          <div class="costo-info">
+            <div class="costo-nome">Perizia dell'immobile</div>
+            <div class="costo-desc">Un tecnico valuta il valore reale</div>
+          </div>
+          <div class="costo-input-wrap">
+            <input type="number" class="costo-inp" id="inp_perizia" value="${state.spese_perizia}" min="0" max="2000" step="50">
+            <span class="costo-unit">€</span>
+          </div>
+        </div>
+        <div class="costo-row">
+          <div class="costo-icon">⚖️</div>
+          <div class="costo-info">
+            <div class="costo-nome">Notaio</div>
+            <div class="costo-desc">Rogito + atto di mutuo</div>
+          </div>
+          <div class="costo-input-wrap">
+            <input type="number" class="costo-inp" id="inp_notaio" value="${state.spese_notaio}" min="0" max="15000" step="100">
+            <span class="costo-unit">€</span>
+          </div>
+        </div>
+        <div class="costo-row">
+          <div class="costo-icon">🏛️</div>
+          <div class="costo-info">
+            <div class="costo-nome">Imposta sostitutiva</div>
+            <div class="costo-desc">Prima casa: 0,25% del mutuo</div>
+          </div>
+          <div class="costo-input-wrap">
+            <span style="font-size:14px;font-weight:700;color:var(--blu-testo)">${fmtEuro(Math.round(getMutuo()*0.0025),0)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="totale-costi" id="totale_costi_box">
+        <div>
+          <div class="totale-label">Totale da avere disponibile</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">acconto + tutti i costi</div>
+        </div>
+        <div class="totale-value" id="totale_costi_val">—</div>
+      </div>
+      <div id="preview_costi"></div>
+      <button class="btn-next" id="btn_continua_costi" onclick="saveCosti()" disabled>Continua →</button>
+    </div>`;
+}
+
+function tuttiCampiCostiValidi() {
+  return ['inp_istruttoria', 'inp_perizia', 'inp_notaio'].every(campoNumericoValido);
+}
+
+function updateCostiPreview() {
+  const btn = document.getElementById('btn_continua_costi');
+  const valido = tuttiCampiCostiValidi();
+  if (btn) btn.disabled = !valido;
+
+  const istr = parseFloat(document.getElementById('inp_istruttoria')?.value)||0;
+  const peri = parseFloat(document.getElementById('inp_perizia')?.value)||0;
+  const nota = parseFloat(document.getElementById('inp_notaio')?.value)||0;
+  state.spese_istruttoria = istr;
+  state.spese_perizia = peri;
+  state.spese_notaio = nota;
+  const mutuo = getMutuo();
+  const imposta = Math.round(mutuo * 0.0025);
+  const totale = state.acconto + istr + peri + nota + imposta;
+  const el = document.getElementById('totale_costi_val');
+  if (el) el.textContent = fmtEuro(totale, 0);
+  const pv = document.getElementById('preview_costi');
+  if (pv) {
+    const extraRispetto = totale - state.acconto;
+    pv.innerHTML = `<div class="concept">
+      <div class="concept-label">📊 Oltre all'acconto</div>
+      <div class="concept-text">
+        Oltre all'acconto di <strong>${fmtEuro(state.acconto,0)}</strong>, dovrai avere altri
+        <strong>${fmtEuro(extraRispetto,0)}</strong> liquidi per le spese accessorie.<br><br>
+        Totale liquidità necessaria il giorno del rogito: <strong>${fmtEuro(totale,0)}</strong>.<br>
+        ${getRedditoTotale() ? `Equivale a circa <strong>${fmt(totale/getRedditoTotale(),1)} mesi</strong> del ${state.cointestato ? 'reddito complessivo' : 'tuo reddito'}.` : ''}
+      </div>
+    </div>`;
+  }
+}
+
+function saveCosti() {
+  const istr = parseFloat(document.getElementById('inp_istruttoria')?.value)||1000;
+  const peri = parseFloat(document.getElementById('inp_perizia')?.value)||350;
+  const nota = parseFloat(document.getElementById('inp_notaio')?.value)||3500;
+  state.spese_istruttoria = istr;
+  state.spese_perizia = peri;
+  state.spese_notaio = nota;
+  nextStep();
+}
+
+// ─── SCENARI VITA ───────────────────────────────────────────────────────────
+function renderScenariVita(wrap) {
+  const mutuo = getMutuo();
+  const tasso = state.tipo_tasso === 'variabile' ? getTassoVariabile() : state.tasso_fisso;
+  const rata = calcRata(mutuo, tasso, state.durata);
+
+  function scenarioHTML(id, emoji, title, sub, contenuto) {
+    return `<div class="scenario-card">
+      <div class="scenario-header" onclick="toggleScenario('${id}')">
+        <div class="scenario-emoji">${emoji}</div>
+        <div class="scenario-title-wrap">
+          <div class="scenario-title">${title}</div>
+          <div class="scenario-sub">${sub}</div>
+        </div>
+        <div class="scenario-chevron" id="chev_${id}">▼</div>
+      </div>
+      <div class="scenario-body" id="body_${id}">${contenuto}</div>
+    </div>`;
+  }
+
+  // Calcoli scenari
+  const saldoResiduo5 = calcolaSaldoResiduo(mutuo, tasso, state.durata, 5);
+  const penaleFisso = state.tipo_tasso === 'fisso' ? Math.round(saldoResiduo5 * 0.015) : 0;
+
+  wrap.innerHTML += `
+    <div class="step-label">Scenari di vita — E se qualcosa cambia?</div>
+    <div class="card">
+      <div class="card-question">Il mutuo dura decenni. La vita no (nel senso: cambia).</div>
+      <div class="card-hint">Tocca ogni scenario per scoprire cosa puoi fare e quali strumenti hai a disposizione.</div>
+    </div>
+    ${scenarioHTML('lavoro','💼','Perdo il lavoro','Cosa succede se non riesco a pagare la rata?',`
+      <ul style="font-size:13px;color:var(--testo);line-height:1.7;margin:0;padding-left:18px">
+        <li><strong>Fondo Gasparrini</strong>: se perdi il lavoro involontariamente (licenziamento, cassa integrazione), puoi sospendere la rata fino a 18 mesi. È gratuito, finanziato dallo Stato. Serve un mutuo prima casa sotto 400.000€ e un ISEE sotto 30.000€.</li>
+        <li><strong>Moratoria bancaria</strong>: alcune banche offrono sospensioni proprie, di solito 6–12 mesi.</li>
+        <li><strong>Cosa non fare</strong>: non ignorare le lettere della banca. Dopo 3 rate non pagate, la banca può avviare il pignoramento. Parlare subito con la banca è sempre la scelta migliore.</li>
+      </ul>`)}
+    ${scenarioHTML('banca','🏦','Voglio cambiare banca','Il mio mutuo non mi convince più',`
+      <ul style="font-size:13px;color:var(--testo);line-height:1.7;margin:0;padding-left:18px">
+        <li><strong>Surrogazione (portabilità)</strong>: puoi trasferire il mutuo a un'altra banca che ti offre condizioni migliori. È un diritto garantito dalla legge Bersani del 2007. La nuova banca si fa carico di tutti i costi: per te è gratuita.</li>
+        <li>La vecchia banca non può opporsi. L'unico rischio è il tempo (2–4 mesi) e che la nuova banca non accetti la tua situazione attuale.</li>
+      </ul>`)}
+    ${scenarioHTML('anticipo','💰','Voglio pagare prima',"Ho ricevuto un'eredità o un bonus",`
+      <ul style="font-size:13px;color:var(--testo);line-height:1.7;margin:0;padding-left:18px">
+        <li><strong>Estinzione parziale anticipata</strong>: puoi versare una somma extra per ridurre il debito. Puoi scegliere se ridurre la <em>rata</em> (paghi meno ogni mese) o la <em>durata</em> (finisci prima). Ridurre la durata di solito fa risparmiare più interessi.</li>
+        <li><strong>Penale</strong>: per i mutui variabili è vietata per legge. Per i fissi può essere fino all'1,5% del capitale rimborsato in anticipo.</li>
+        <li>Dopo 5 anni il saldo residuo stimato del tuo mutuo è circa <strong>${fmtEuro(saldoResiduo5,0)}</strong>.
+        ${penaleFisso > 0 ? `Penale massima stimata: <strong>${fmtEuro(penaleFisso,0)}</strong>.` : ''}</li>
+      </ul>`)}
+    ${scenarioHTML('ristruttura','🔨','Voglio ristrutturare','Ho bisogno di altri soldi dopo l\'acquisto',`
+      <ul style="font-size:13px;color:var(--testo);line-height:1.7;margin:0;padding-left:18px">
+        <li><strong>Mutuo di liquidità</strong>: puoi chiedere un finanziamento aggiuntivo con garanzia ipotecaria sulla stessa casa, se il valore della casa supera il debito residuo.</li>
+        <li><strong>Prestito personale</strong>: più semplice ma con tassi più alti e durate più corte.</li>
+        <li><strong>Bonus fiscali</strong>: per ristrutturazioni ci sono detrazioni del 50% (Bonus Ristrutturazioni) e fino al 110% in casi particolari (Superbonus, soggetto a requisiti). Controlla sempre le norme in vigore al momento.</li>
+      </ul>`)}
+    ${scenarioHTML('eredita','👨‍👩‍👧','Cosa succede se muoio','Il mutuo passa ai miei eredi?',`
+      <ul style="font-size:13px;color:var(--testo);line-height:1.7;margin:0;padding-left:18px">
+        <li>In caso di decesso, il mutuo non si estingue automaticamente: <strong>passa agli eredi</strong> che accettano l'eredità, insieme alla casa.</li>
+        <li>Gli eredi possono continuare a pagare le rate o vendere l'immobile per estinguere il debito.</li>
+        <li><strong>Assicurazione vita sul mutuo</strong>: molte banche la richiedono o la consigliano. Copre il debito residuo in caso di decesso o invalidità permanente. Con il tuo mutuo, un premio indicativo è circa <strong>${fmtEuro(Math.round(mutuo*0.002),0)}/anno</strong>.</li>
+      </ul>`)}
+    <button class="btn-next" onclick="nextStep()" style="margin-top:8px">Continua →</button>`;
+}
+
+function calcolaSaldoResiduo(capitale, tasso_annuo, anni_totali, anni_trascorsi) {
+  if (tasso_annuo === 0) return capitale - (capitale / (anni_totali * 12)) * (anni_trascorsi * 12);
+  const r = tasso_annuo / 100 / 12;
+  const n = anni_totali * 12;
+  const k = anni_trascorsi * 12;
+  const rata = calcRata(capitale, tasso_annuo, anni_totali);
+  return rata * (1 - Math.pow(1+r, -(n-k))) / r;
+}
+
+function toggleScenario(id) {
+  const body = document.getElementById('body_' + id);
+  const chev = document.getElementById('chev_' + id);
+  if (!body) return;
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function renderTimeline(wrap) {
+  const mutuo = getMutuo();
+  const tasso = state.tipo_tasso === 'variabile' ? getTassoVariabile() : state.tasso_fisso;
+  const rata = calcRata(mutuo, tasso, state.durata);
+
+  wrap.innerHTML += `
+    <div class="step-label">Il percorso completo</div>
+    <div class="card">
+      <div class="card-question">Cosa succede dal compromesso al rogito</div>
+      <div class="card-hint">I passi reali dell'acquisto con mutuo, con i concetti chiave spiegati.</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot">1</div>
+          <div class="tl-content">
+            <div class="tl-title">Proposta d'acquisto</div>
+            <div class="tl-text">Fai un'offerta scritta al venditore. Se accettata, diventa vincolante. Di solito si versa un assegno di caparra (2–5% del prezzo) che si perde se ti ritiri.</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot">2</div>
+          <div class="tl-content">
+            <div class="tl-title">Richiesta del mutuo alla banca</div>
+            <div class="tl-text">Porti i documenti (reddito, contratto di lavoro, estratti conto). La banca fa l'<strong>istruttoria</strong>: valuta se puoi permetterti il mutuo e ordina una <strong>perizia</strong> dell'immobile per stimarne il valore reale.</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot">3</div>
+          <div class="tl-content">
+            <div class="tl-title">Delibera e offerta vincolante</div>
+            <div class="tl-text">La banca ti invia il PIES (Prospetto Informativo Europeo Standardizzato): un documento che riepiloga tutte le condizioni del mutuo. Hai <strong>7 giorni per riflettere</strong> senza impegnarti.</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot">4</div>
+          <div class="tl-content">
+            <div class="tl-title">Compromesso (preliminare)</div>
+            <div class="tl-text">Contratto firmato davanti al notaio o privato. Si versa la <strong>caparra confirmatoria</strong> (10–15% del prezzo). Se il venditore si ritira, ti restituisce il doppio. Se ti ritiri tu, perdi tutto.</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot">5</div>
+          <div class="tl-content">
+            <div class="tl-title">Rogito notarile</div>
+            <div class="tl-text">Il giorno del rogito dal notaio, la banca eroga il mutuo direttamente al venditore. Tu paghi il saldo dell'acconto. Firmi l'<strong>atto di mutuo</strong> e l'<strong>atto di compravendita</strong>. Le chiavi sono tue.</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot">6</div>
+          <div class="tl-content">
+            <div class="tl-title">Prima rata</div>
+            <div class="tl-text">Il mese successivo al rogito parte la prima rata di <strong>${fmtEuro(rata,0)}</strong>. Continuerà per <strong>${state.durata} anni</strong>. Puoi sempre fare rimborsi parziali anticipati o estinguere il mutuo prima.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="concept">
+        <div class="concept-label">💡 Estinzione anticipata</div>
+        <div class="concept-text">
+          Puoi restituire tutto il mutuo prima della scadenza. La banca può chiederti una <strong>penale di estinzione</strong>, 
+          ma per i mutui a tasso variabile è vietata per legge (decreto Bersani). 
+          Per i fissi è ammessa ma limitata all'1–1,5% del capitale residuo.
+          Conviene estinguere anticipatamente? Dipende dal tasso: se hai un mutuo al 2% 
+          e potresti investire quei soldi al 4%, forse no.
+        </div>
+      </div>
+    </div>
+    <div class="card" style="background: var(--verde-light); border-color: var(--verde);">
+      <div style="font-size:22px; margin-bottom: 8px;">🏡</div>
+      <div style="font-size:17px; font-weight:700; color:#1a3d2e; margin-bottom:8px;">${state.nome ? `${state.nome} ha le chiavi in mano` : 'Le chiavi sono in mano'}</div>
+      <div style="font-size:14px; color:#2d5a47; line-height:1.6; margin-bottom:16px;">
+        La casa è finita: guarda l'illustrazione qui sopra.
+        ${state.nome ? state.nome : 'Hai'} ${state.nome ? 'ora conosce' : 'ora conosci'} i concetti principali di un mutuo: quanto costa davvero, come si sceglie il tasso, quali costi si aggiungono al prezzo della casa e cosa fare se la vita cambia strada.<br><br>
+        Portati questi concetti in banca: sapere le domande giuste da fare vale quanto sapere le risposte.
+      </div>
+    </div>
+    <button class="btn-restart" onclick="restart()">↺ Ricomincia una nuova storia</button>
+    <div class="legal">Questo strumento è solo educativo e non costituisce consulenza finanziaria. I calcoli sono indicativi. Prima di sottoscrivere un mutuo, rivolgiti sempre a un consulente abilitato o alla tua banca.</div>`;
+}
+
+function nextStep() {
+  state.step = Math.min(state.step + 1, TOTAL_STEPS - 1);
+  render();
+}
+
+function goBack() {
+  state.step = Math.max(state.step - 1, 0);
+  render();
+}
+
+// ─── MODALITÀ SEMPLICE (accessibilità) ──────────────────────────────────────
+function toggleModoSemplice() {
+  state.modoSemplice = !state.modoSemplice;
+  render();
+}
+
+function applyModoSemplice() {
+  document.body.classList.toggle('modo-semplice', !!state.modoSemplice);
+  const btn = document.getElementById('accessBtn');
+  if (btn) btn.setAttribute('aria-pressed', state.modoSemplice ? 'true' : 'false');
+
+  if (!state.modoSemplice) return;
+
+  // Tronca a 2 righe i testi lunghi con un pulsante "Leggi tutto" per chi lo desidera
+  const elementi = document.querySelectorAll('#mainContent .concept-text, #mainContent .warning-text, #mainContent .card-hint');
+  elementi.forEach(el => {
+    el.classList.add('truncabile');
+    // Forza un reflow per misurare correttamente scrollHeight vs clientHeight
+    const overflow = el.scrollHeight > el.clientHeight + 2;
+    if (overflow) {
+      const btnLeggi = document.createElement('button');
+      btnLeggi.className = 'btn-leggi-tutto';
+      btnLeggi.textContent = 'Leggi tutto ▾';
+      btnLeggi.onclick = () => {
+        const espanso = el.classList.toggle('espanso');
+        btnLeggi.textContent = espanso ? 'Mostra meno ▴' : 'Leggi tutto ▾';
+      };
+      el.insertAdjacentElement('afterend', btnLeggi);
+    } else {
+      el.classList.remove('truncabile');
+    }
+  });
+}
+
+function restart() {
+  state.step = 0;
+  state.nome = '';
+  state.valore_immobile = null;
+  state.acconto = null;
+  state.garanzia_consap = null;
+  state.eta = null;
+  state.durata = 20;
+  state.tipo_tasso = null;
+  state.tasso_fisso = 3.5;
+  state.spread = 1.2;
+  state.euribor = 3.8;
+  state.reddito = null;
+  state.spese_istruttoria = 1000;
+  state.spese_perizia = 350;
+  state.spese_notaio = 3500;
+  state.cointestato = null;
+  state.eta2 = null;
+  state.reddito2 = null;
+  render();
+}
+
+render();
+
+/* ===================== TEMA CHIARO/SCURO ===================== */
+function applyThemeButtonState() {
+  const scuro = document.documentElement.getAttribute('data-theme') === 'dark';
+  const btn = document.getElementById('themeBtn');
+  const icon = document.getElementById('themeIcon');
+  if (btn) {
+    btn.setAttribute('aria-pressed', scuro ? 'true' : 'false');
+    btn.title = scuro ? 'Attiva il tema chiaro' : 'Attiva il tema scuro';
+  }
+  if (icon) icon.textContent = scuro ? '☀️' : '🌙';
+}
+
+function toggleTema() {
+  const scuro = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (scuro) {
+    document.documentElement.removeAttribute('data-theme');
+  } else {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  try { localStorage.setItem('tema', scuro ? 'chiaro' : 'scuro'); } catch (e) {}
+  applyThemeButtonState();
+  aggiornaTemaGraficoRata();
+}
+
+applyThemeButtonState();
+
+/* ===================== TRADUZIONE EN/DE ===================== */
+// Il simulatore genera il contenuto dinamicamente in italiano; usiamo il
+// motore di Google Translate solo come "traduttore automatico" pilotato
+// dai nostri pulsanti IT/EN/DE, senza mostrarne la UI e senza ricaricare
+// la pagina (per non perdere le risposte già inserite dall'utente).
+let currentLang = 'it';
+
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'it',
+    includedLanguages: 'it,en,de',
+    autoDisplay: false
+  }, 'google_translate_element');
+}
+
+// Google reimposta di tanto in tanto uno stile inline (top/margin) su
+// <html>/<body> per far spazio alla sua banner-bar: lo azzeriamo ogni volta
+// che prova a cambiarlo, così la barra non compare mai, nemmeno per un istante.
+function nascondiBannerGoogle() {
+  [document.documentElement, document.body].forEach(el => {
+    if (el.style.top && el.style.top !== '0px') el.style.top = '0px';
+    if (el.style.marginTop && el.style.marginTop !== '0px') el.style.marginTop = '0px';
+  });
+}
+new MutationObserver(nascondiBannerGoogle).observe(document.documentElement, {
+  attributes: true,
+  attributeFilter: ['style'],
+  subtree: true
+});
+
+function setLanguage(lang, attempt) {
+  attempt = attempt || 0;
+  const combo = document.querySelector('.goog-te-combo');
+
+  if (!combo) {
+    // Il widget Google Translate si inizializza in modo asincrono: riproviamo
+    // per un po', poi rinunciamo silenziosamente (es. senza connessione).
+    if (attempt < 20) {
+      setTimeout(() => setLanguage(lang, attempt + 1), 250);
+    }
+    return;
+  }
+
+  if (combo.value !== lang) {
+    combo.value = lang;
+    combo.dispatchEvent(new Event('change'));
+  }
+
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+}
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>
