@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Capire il Mutuo</title>
 <script>
-  // Applica subito il tema salvato (prima del rendering) per evitare un lampo del tema sbagliato
   (function() {
     try {
       const salvato = localStorage.getItem('tema');
@@ -32,6 +31,8 @@
     --arancio-light: #fdf2ea;
     --arancio-label: #a55725;
     --blu-verdict: #2f5f8f;
+    --blu-accento: #4a80c4;
+    --rosso: #c0392b;
     --rosso-light: #fdecea;
     --grigio: #f5f6f8;
     --grigio-mid: #e2e5ea;
@@ -40,7 +41,6 @@
     --bianco: #ffffff;
   }
 
-  /* TEMA SCURO */
   html[data-theme="dark"] {
     --blu-testo: #a9c2f0;
     --grigio: #10162a;
@@ -48,14 +48,13 @@
     --testo: #e7eaf3;
     --testo-soft: #9aa3bd;
     --bianco: #1a2140;
-    /* Sfondi tenui (concept/warning box) scuriti: in chiaro restano chiari,
-       ma qui il testo sopra diventa chiaro (#8fd9b8 ecc.), quindi anche lo sfondo deve scurirsi
-       per mantenere il contrasto — altrimenti è testo chiaro su sfondo chiaro. */
+
     --verde-light: #16332a;
     --arancio-light: #3a2415;
     --verde-label: #8fd9b8;
     --arancio-label: #f0bb8c;
     --blu-verdict: #8fb6ea;
+    --rosso: #ff8a75;
     --rosso-light: #3a1512;
   }
   html[data-theme="dark"] .story-scene {
@@ -89,7 +88,6 @@
     transition: background 0.2s, color 0.2s;
   }
 
-  /* HEADER */
   .header {
     width: 100%;
     background: var(--blu);
@@ -121,7 +119,6 @@
     margin-top: 1px;
   }
 
-  /* TOGGLE ACCESSIBILITÀ */
   .access-toggle {
     display: flex;
     align-items: center;
@@ -156,7 +153,6 @@
     color: white;
   }
 
-  /* TOGGLE TEMA CHIARO/SCURO */
   .theme-toggle {
     display: flex;
     align-items: center;
@@ -178,7 +174,6 @@
   }
   .theme-icon { font-size: 14px; line-height: 1; }
 
-  /* SELETTORE LINGUA */
   .lang-switch {
     display: flex;
     align-items: center;
@@ -204,7 +199,6 @@
   .lang-btn:hover { color: white; }
   .lang-btn.active { background: var(--verde-btn); color: white; }
 
-  /* Nasconde la UI di default del widget Google Translate: lo peschiamo via JS */
   #google_translate_element,
   .goog-te-banner-frame,
   .goog-te-gadget-icon,
@@ -218,7 +212,6 @@
   .goog-tooltip, .goog-tooltip:hover { display: none !important; visibility: hidden !important; }
   .goog-tooltip:hover { display: none !important; }
 
-  /* MODALITÀ SEMPLICE: testo più grande, più contrasto */
   body.modo-semplice { font-size: 106%; }
   body.modo-semplice { --testo-soft: #38414f; }
   html[data-theme="dark"] body.modo-semplice { --testo-soft: #c3cadb; }
@@ -242,7 +235,6 @@
   body.modo-semplice .option-desc { font-size: 13.5px; line-height: 1.5; }
   body.modo-semplice .step-label { font-size: 12px; }
 
-  /* Troncamento leggibile per testi lunghi in modalità semplice */
   .truncabile {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -268,7 +260,6 @@
   }
   .btn-leggi-tutto:hover { text-decoration: underline; }
 
-  /* SCENA NARRATIVA - la casa che cresce */
   .story-scene {
     width: 100%;
     background: linear-gradient(180deg, #dceaf5 0%, #eef4f8 65%, var(--grigio) 100%);
@@ -306,7 +297,6 @@
     height: 108px;
   }
 
-  /* PROGRESS */
   .progress-bar-wrap {
     width: 100%;
     background: var(--blu-mid);
@@ -318,7 +308,6 @@
     transition: width 0.5s ease;
   }
 
-  /* MAIN */
   .main {
     width: 100%;
     max-width: 640px;
@@ -328,16 +317,15 @@
     gap: 20px;
   }
 
-  /* STEP LABEL */
   .step-label {
     font-size: 11px;
     font-weight: 600;
     color: var(--testo-soft);
     text-transform: uppercase;
     letter-spacing: 0.8px;
+    margin-bottom: 12px;
   }
 
-  /* CARD */
   .card {
     background: var(--bianco);
     border-radius: 16px;
@@ -349,7 +337,7 @@
     font-weight: 700;
     color: var(--blu-testo);
     line-height: 1.3;
-    margin-bottom: 8px;
+    margin-bottom: 14px;
   }
   .card-hint {
     font-size: 14px;
@@ -358,7 +346,6 @@
     line-height: 1.5;
   }
 
-  /* CONCEPT BOX */
   .concept {
     background: var(--verde-light);
     border-left: 3px solid var(--verde);
@@ -372,7 +359,7 @@
     color: var(--verde-label);
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    margin-bottom: 6px;
+    margin-bottom: 10px;
   }
   .concept-text {
     font-size: 13px;
@@ -381,7 +368,6 @@
   }
   .concept-text strong { color: #1a3d2e; }
 
-  /* WARNING BOX */
   .warning {
     background: var(--arancio-light);
     border-left: 3px solid var(--arancio);
@@ -395,7 +381,7 @@
     color: var(--arancio-label);
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    margin-bottom: 6px;
+    margin-bottom: 10px;
   }
   .warning-text {
     font-size: 13px;
@@ -403,7 +389,6 @@
     line-height: 1.6;
   }
 
-  /* INPUT */
   .input-group {
     display: flex;
     flex-direction: column;
@@ -449,7 +434,6 @@
   }
   .input-error.visible { display: block; }
 
-  /* SLIDER */
   .slider-wrap { margin-bottom: 4px; }
   .slider {
     width: 100%;
@@ -477,7 +461,6 @@
     margin-top: 6px;
   }
 
-  /* OPTIONS */
   .options {
     display: flex;
     flex-direction: column;
@@ -500,7 +483,7 @@
     font-size: 15px;
     font-weight: 600;
     color: var(--blu-testo);
-    margin-bottom: 3px;
+    margin-bottom: 6px;
   }
   .option-desc {
     font-size: 12px;
@@ -508,7 +491,6 @@
     line-height: 1.4;
   }
 
-  /* BUTTON */
   .btn-next {
     width: 100%;
     padding: 15px;
@@ -526,7 +508,6 @@
   .btn-next:hover { background: var(--blu-mid); }
   .btn-next:disabled { background: var(--grigio-mid); color: var(--testo-soft); cursor: not-allowed; }
 
-  /* RIEPILOGO RESULT */
   .result-card {
     background: var(--blu);
     border-radius: 16px;
@@ -568,7 +549,7 @@
   .result-item-label {
     font-size: 11px;
     color: rgba(255,255,255,0.5);
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     font-weight: 500;
   }
   .result-item-value {
@@ -579,7 +560,6 @@
   .result-item-value.green { color: #7de8c0; }
   .result-item-value.orange { color: #f5a872; }
 
-  /* COMPARISON */
   .comparison {
     background: var(--bianco);
     border-radius: 16px;
@@ -594,39 +574,45 @@
     background: var(--grigio);
     border-bottom: 1px solid var(--grigio-mid);
   }
+  /* Grid (non flex) per garantire che i valori delle due colonne restino
+     allineati riga per riga: con flex, le righe che avevano anche un badge
+     .comp-tag (4° elemento) si comprimevano in modo diverso dalle righe senza
+     badge, sfasando le colonne "Fisso"/"Variabile" tra una riga e l'altra. */
   .comparison-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 90px 90px minmax(64px, auto);
     align-items: center;
     padding: 16px 20px;
     border-bottom: 1px solid var(--grigio-mid);
     gap: 12px;
   }
   .comparison-row:last-child { border-bottom: none; }
-  .comp-label { flex: 1; font-size: 14px; font-weight: 500; color: var(--testo); }
-  .comp-a { width: 90px; text-align: right; font-size: 14px; font-weight: 700; color: var(--blu-testo); }
-  .comp-b { width: 90px; text-align: right; font-size: 14px; font-weight: 700; color: var(--verde-label); }
+  .comp-label { font-size: 14px; font-weight: 500; color: var(--testo); }
+  .comp-a { text-align: right; font-size: 14px; font-weight: 700; color: var(--blu-testo); }
+  .comp-b { text-align: right; font-size: 14px; font-weight: 700; color: var(--verde-label); }
   .comp-tag {
     font-size: 10px;
     font-weight: 700;
     padding: 3px 7px;
     border-radius: 20px;
     white-space: nowrap;
+    justify-self: end;
   }
   .tag-better { background: var(--verde-light); color: var(--verde-label); }
   .tag-worse { background: var(--arancio-light); color: var(--arancio-label); }
   .tag-neutral { background: var(--grigio); color: var(--testo-soft); }
   .comp-col-header {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 90px 90px minmax(64px, auto);
     padding: 10px 20px;
     gap: 12px;
     background: var(--grigio);
     border-bottom: 1px solid var(--grigio-mid);
   }
   .col-h { font-size: 11px; font-weight: 700; }
-  .col-h.a { width: 90px; margin-left: auto; text-align: right; color: var(--blu-testo); }
-  .col-h.b { width: 90px; text-align: right; color: var(--verde-label); }
+  .col-h.a { text-align: right; color: var(--blu-testo); }
+  .col-h.b { text-align: right; color: var(--verde-label); }
 
-  /* TIMELINE */
   .timeline {
     display: flex;
     flex-direction: column;
@@ -662,10 +648,9 @@
     z-index: 1;
   }
   .tl-content { flex: 1; padding-top: 4px; }
-  .tl-title { font-size: 14px; font-weight: 700; color: var(--blu-testo); margin-bottom: 4px; }
+  .tl-title { font-size: 14px; font-weight: 700; color: var(--blu-testo); margin-bottom: 8px; }
   .tl-text { font-size: 13px; color: var(--testo-soft); line-height: 1.5; }
 
-  /* BACK BTN */
   .btn-back {
     background: none;
     border: none;
@@ -680,7 +665,6 @@
   }
   .btn-back:hover { color: var(--testo); }
 
-  /* RESTART */
   .btn-restart {
     width: 100%;
     padding: 13px;
@@ -696,7 +680,6 @@
   }
   .btn-restart:hover { background: var(--grigio); }
 
-  /* GRAFICO RATA (Chart.js) */
   .chart-container {
     position: relative;
     height: 240px;
@@ -711,7 +694,6 @@
   }
   .chart-axis-hint strong { color: var(--testo); }
 
-  /* PROSPETTO RATA MENSILE (tabella) */
   .tabella-wrap {
     overflow-x: auto;
     margin: 4px 0 18px;
@@ -750,17 +732,14 @@
     margin: -8px 0 16px;
   }
 
-  /* HIDDEN */
   .hidden { display: none !important; }
 
-  /* ANIMATE IN */
   @keyframes slideUp {
     from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
   }
   .animate-in { animation: slideUp 0.3s ease forwards; }
 
-  /* SOSTENIBILITA METER */
   .meter-wrap { margin: 16px 0; }
   .meter-track {
     height: 14px;
@@ -789,7 +768,6 @@
     background: rgba(0,0,0,0.25);
   }
 
-  /* COSTI GRID */
   .costi-grid {
     display: flex;
     flex-direction: column;
@@ -838,7 +816,6 @@
   .totale-label { font-size: 13px; color: rgba(255,255,255,0.7); }
   .totale-value { font-size: 24px; font-weight: 800; }
 
-  /* SCENARI VITA */
   .scenario-card {
     border: 1.5px solid var(--grigio-mid);
     border-radius: 14px;
@@ -874,7 +851,6 @@
   }
   .scenario-chevron.open { transform: rotate(180deg); }
 
-  /* PUNTEGGIO SALUTE - gauge */
   .gauge-wrap {
     display: flex;
     flex-direction: column;
@@ -935,11 +911,10 @@
     text-transform: uppercase;
     letter-spacing: 0.6px;
     color: rgba(255,255,255,0.55);
-    margin-bottom: 6px;
+    margin-bottom: 10px;
   }
   .suggerimento-text { font-size: 13px; line-height: 1.6; }
 
-  /* NOTA LEGALE */
   .legal {
     font-size: 11px;
     color: var(--testo-soft);
@@ -1028,6 +1003,36 @@ const steps = [
 
 const TOTAL_STEPS = steps.length;
 
+// Titoli brevi delle sezioni, usati nei pulsanti "Continua" per dire all'utente
+// dove sta andando (non ripetono per forza il titolo pieno mostrato nella sezione
+// stessa, che può contenere un sottotitolo troppo lungo per un pulsante).
+const TITOLI_STEP = {
+  valore_immobile: 'La casa',
+  acconto: "L'acconto",
+  ltv_spiegazione: 'LTV',
+  intestatari: 'Chi richiede il mutuo',
+  durata: 'Durata',
+  tipo_tasso: 'Tipo di tasso',
+  costi_iniziali: 'Costi iniziali',
+  riepilogo: 'Il tuo riepilogo',
+  punteggio_salute: 'Punteggio di salute',
+  confronto: 'Fisso vs variabile',
+  scenari_vita: 'Scenari di vita',
+  timeline_acquisto: 'Il percorso completo',
+};
+
+// Titolo della sezione successiva a quella indicata, da mostrare nel pulsante
+// "Continua". Gestisce a parte 'tasso_dettaglio', il cui titolo dipende dalla
+// scelta fisso/variabile/misto fatta nello step precedente.
+function titoloProssimaSezione(stepIdCorrente) {
+  const idx = steps.indexOf(stepIdCorrente);
+  const prossimo = steps[idx + 1];
+  if (prossimo === 'tasso_dettaglio') {
+    return state.tipo_tasso === 'variabile' ? 'Il tasso variabile' : 'Il tasso fisso';
+  }
+  return TITOLI_STEP[prossimo] || '';
+}
+
 function fmt(n, decimals=0) {
   return n.toLocaleString('it-IT', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
@@ -1036,7 +1041,10 @@ function fmtEuro(n, decimals=0) {
   return '€ ' + fmt(n, decimals);
 }
 
-// Un campo numerico è "popolato" se ha un valore non vuoto entro i suoi limiti (min/max sull'input)
+function dataOggiIT() {
+  return new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 function campoNumericoValido(id) {
   const el = document.getElementById(id);
   if (!el || el.value === '') return false;
@@ -1068,8 +1076,6 @@ function getTassoVariabile() {
 }
 
 function getEtaVincolante() {
-  // In un mutuo cointestato, la maggior parte delle banche calcola la durata massima
-  // sull'intestatario più anziano: è il vincolo più restrittivo per l'intera pratica.
   if (state.cointestato && state.eta2) {
     return Math.max(state.eta || 0, state.eta2);
   }
@@ -1088,7 +1094,6 @@ function setProgress(current) {
   renderStoryScene(pct);
 }
 
-// ─── SCENA NARRATIVA: la casa che cresce ────────────────────────────────────
 const FASI = [
   { soglia: 0,   nome: 'Il terreno' },
   { soglia: 14,  nome: 'Le fondamenta' },
@@ -1110,35 +1115,34 @@ function renderStoryScene(pct) {
   if (nameEl) nameEl.textContent = state.nome ? `La casa di ${state.nome}` : 'La tua storia';
   if (phaseEl) phaseEl.textContent = fase.nome;
 
-  // Helper di visibilità cumulativa: ogni elemento appare sopra una soglia e resta
   const show = (soglia) => pct >= soglia;
   const groundY = 92;
 
   let svgParts = [];
 
-  // Cielo e sole sempre presenti
-  svgParts.push(`<circle cx="358" cy="24" r="14" fill="#ffd97a" opacity="0.9"/>`);
-  // Nuvole leggere
+  const notte = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (notte) {
+    svgParts.push(`<circle cx="358" cy="24" r="14" fill="#e9edf7"/>`);
+    svgParts.push(`<circle cx="352" cy="19" r="12" fill="#1c2c42"/>`);
+  } else {
+    svgParts.push(`<circle cx="358" cy="24" r="14" fill="#ffd97a" opacity="0.9"/>`);
+  }
   svgParts.push(`<ellipse cx="60" cy="26" rx="22" ry="8" fill="#ffffff" opacity="0.7"/>`);
   svgParts.push(`<ellipse cx="140" cy="18" rx="16" ry="6" fill="#ffffff" opacity="0.5"/>`);
 
-  // Terreno (sempre)
   svgParts.push(`<rect x="0" y="${groundY}" width="400" height="16" fill="#c9dfc2"/>`);
   svgParts.push(`<rect x="0" y="${groundY+10}" width="400" height="6" fill="#b7d4ae"/>`);
 
-  // Recinzione/lotto delimitato (fase terreno)
   if (show(0)) {
     svgParts.push(`<line x1="60" y1="${groundY}" x2="60" y2="${groundY-6}" stroke="#9db894" stroke-width="2"/>`);
     svgParts.push(`<line x1="60" y1="${groundY-6}" x2="340" y2="${groundY-6}" stroke="#9db894" stroke-width="2" stroke-dasharray="4,4"/>`);
     svgParts.push(`<line x1="340" y1="${groundY}" x2="340" y2="${groundY-6}" stroke="#9db894" stroke-width="2"/>`);
   }
 
-  // Fondamenta (blocco grigio alla base)
   if (show(14)) {
     svgParts.push(`<rect x="120" y="${groundY-4}" width="160" height="10" fill="#a8adb5" rx="1"/>`);
   }
 
-  // Muri
   const wallTop = 46;
   if (show(28)) {
     const wallH = Math.min(groundY - wallTop, (groundY - wallTop) * Math.min(1, (pct-28)/10 + 0.4));
@@ -1146,35 +1150,29 @@ function renderStoryScene(pct) {
     svgParts.push(`<rect x="130" y="${groundY - wallH}" width="140" height="${wallH}" fill="none" stroke="#c7a97a" stroke-width="1.5" />`);
   }
 
-  // Tetto
   if (show(42)) {
     svgParts.push(`<polygon points="120,${wallTop} 200,14 280,${wallTop}" fill="#c0533f"/>`);
     svgParts.push(`<polygon points="120,${wallTop} 200,14 280,${wallTop}" fill="none" stroke="#9c4230" stroke-width="1.5"/>`);
-    svgParts.push(`<rect x="240" y="20" width="10" height="20" fill="#8b8b8b"/>`); // camino
+    svgParts.push(`<rect x="240" y="20" width="10" height="20" fill="#8b8b8b"/>`);
   }
 
-  // Porta e finestre
   if (show(56)) {
-    // porta
     svgParts.push(`<rect x="188" y="66" width="24" height="26" rx="2" fill="#6b4226"/>`);
     svgParts.push(`<circle cx="206" cy="80" r="1.4" fill="#f0c419"/>`);
-    // finestre
     svgParts.push(`<rect x="145" y="58" width="20" height="18" rx="2" fill="#bfe3f0" stroke="#8fa9b3" stroke-width="1.5"/>`);
     svgParts.push(`<rect x="235" y="58" width="20" height="18" rx="2" fill="#bfe3f0" stroke="#8fa9b3" stroke-width="1.5"/>`);
     svgParts.push(`<line x1="155" y1="58" x2="155" y2="76" stroke="#8fa9b3" stroke-width="1.2"/>`);
     svgParts.push(`<line x1="245" y1="58" x2="245" y2="76" stroke="#8fa9b3" stroke-width="1.2"/>`);
   }
 
-  // Giardino: alberello + siepe + sentiero
   if (show(70)) {
-    svgParts.push(`<rect x="200" y="88" width="8" height="4" fill="#d8c9a3"/>`); // sentiero base
+    svgParts.push(`<rect x="200" y="88" width="8" height="4" fill="#d8c9a3"/>`);
     svgParts.push(`<circle cx="100" cy="82" r="9" fill="#5c9a5f"/>`);
     svgParts.push(`<rect x="98" y="88" width="4" height="6" fill="#7a5a3a"/>`);
     svgParts.push(`<circle cx="310" cy="84" r="7" fill="#5c9a5f"/>`);
     svgParts.push(`<rect x="308" y="90" width="3" height="4" fill="#7a5a3a"/>`);
   }
 
-  // Luci accese in casa (calore, sera)
   if (show(84)) {
     svgParts.push(`<rect x="145" y="58" width="20" height="18" rx="2" fill="#ffe9a8"/>`);
     svgParts.push(`<rect x="235" y="58" width="20" height="18" rx="2" fill="#ffe9a8"/>`);
@@ -1182,7 +1180,6 @@ function renderStoryScene(pct) {
     svgParts.push(`<line x1="245" y1="58" x2="245" y2="76" stroke="#e8c877" stroke-width="1.2"/>`);
   }
 
-  // Finale: cuoricino sopra la casa, cassetta della posta, tutto completo
   if (show(96)) {
     svgParts.push(`<text x="200" y="8" text-anchor="middle" font-size="14">💚</text>`);
     svgParts.push(`<rect x="118" y="86" width="6" height="8" fill="#8b8b8b"/>`);
@@ -1224,7 +1221,6 @@ function render() {
   main.appendChild(wrap);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // Tutti gli init post-DOM centralizzati qui, dopo che wrap è nel DOM
   const currentStep = steps[state.step];
 
   if (currentStep === 'intestatari') {
@@ -1274,7 +1270,12 @@ function render() {
       if (el) el.addEventListener('input', updateCostiPreview);
     });
   }
-  // Applica la modalità semplice (font, contrasto, troncamento) ad ogni render
+  if (currentStep === 'riepilogo') {
+    const mutuo = getMutuo();
+    const tasso = state.tipo_tasso === 'variabile' ? getTassoVariabile() : state.tasso_fisso;
+    const datiPeriodi = calcolaDatiAmmortamentoPeriodi(mutuo, tasso, state.durata);
+    disegnaGraficoRata(datiPeriodi);
+  }
   applyModoSemplice();
 }
 
@@ -1284,17 +1285,17 @@ function renderBenvenuto(wrap) {
     <div class="card">
       <div class="card-question">Il mutuo spiegato in modo semplice</div>
       <div class="card-hint">
-        Risponderai a poche domande sulla casa che vuoi acquistare. 
-        Ad ogni passo ti spieghiamo cosa significa ogni numero e ogni scelta, 
+        Risponderai a poche domande sulla casa che vuoi acquistare.
+        Ad ogni passo ti spieghiamo cosa significa ogni numero e ogni scelta,
         senza gergo tecnico.
       </div>
       <div class="concept">
         <div class="concept-label">💡 Cos'è un mutuo</div>
         <div class="concept-text">
-          Un mutuo è un prestito a lungo termine che una banca ti dà per comprare casa. 
-          Tu restituisci i soldi mese per mese — ogni pagamento si chiama <strong>rata</strong> — 
-          per un periodo che può durare da 10 a 30 anni. 
-          In cambio, la banca ti chiede gli <strong>interessi</strong>: una percentuale aggiuntiva 
+          Un mutuo è un prestito a lungo termine che una banca ti dà per comprare casa.
+          Tu restituisci i soldi mese per mese — ogni pagamento si chiama <strong>rata</strong> —
+          per un periodo che può durare da 10 a 30 anni.
+          In cambio, la banca ti chiede gli <strong>interessi</strong>: una percentuale aggiuntiva
           sul denaro che ti ha prestato.
         </div>
       </div>
@@ -1314,7 +1315,7 @@ function renderBenvenuto(wrap) {
         <div class="warning-label">⚠️ Nota importante</div>
         <div class="warning-text">Questo strumento è solo educativo. I calcoli mostrano stime indicative per capire come funziona un mutuo. Per una valutazione reale rivolgiti sempre a un consulente finanziario o alla tua banca.</div>
       </div>
-      <button class="btn-next" onclick="saveNome()">Inizia →</button>
+      <button class="btn-next" onclick="saveNome()">Inizia: ${titoloProssimaSezione('benvenuto')} →</button>
     </div>`;
 }
 
@@ -1333,17 +1334,17 @@ function renderValoreImmobile(wrap) {
       <div class="concept">
         <div class="concept-label">💡 Valore dell'immobile</div>
         <div class="concept-text">
-          È il prezzo totale della casa. Tieni presente che al prezzo di vendita 
-          si aggiungono altri costi: <strong>notaio</strong> (circa 2.000–5.000€), 
-          <strong>imposte</strong> (2% o 9% del valore catastale), 
-          <strong>agenzia immobiliare</strong> (circa 2–3% del prezzo). 
+          È il prezzo totale della casa. Tieni presente che al prezzo di vendita
+          si aggiungono altri costi: <strong>notaio</strong> (circa 2.000–5.000€),
+          <strong>imposte</strong> (2% o 9% del valore catastale),
+          <strong>agenzia immobiliare</strong> (circa 2–3% del prezzo).
           La banca di solito finanzia solo il prezzo della casa, non queste spese accessorie.
         </div>
       </div>
       <div class="input-group">
         <div class="input-label">Prezzo della casa</div>
         <div class="input-row">
-          <input type="number" class="input-field" id="inp_valore" 
+          <input type="number" class="input-field" id="inp_valore"
             placeholder="200000" min="50000" max="2000000" step="5000"
             value="${state.valore_immobile || ''}"
             oninput="updatePreview()">
@@ -1355,7 +1356,7 @@ function renderValoreImmobile(wrap) {
         <div class="concept-label">📊 Riepilogo rapido</div>
         <div class="concept-text" id="preview_valore_text"></div>
       </div>
-      <button class="btn-next" id="btn_valore" onclick="saveValoreImmobile()" disabled>Continua →</button>
+      <button class="btn-next" id="btn_valore" onclick="saveValoreImmobile()" disabled>Continua: ${titoloProssimaSezione('valore_immobile')} →</button>
     </div>`;
 
 }
@@ -1371,7 +1372,7 @@ function updatePreview() {
     preview.style.display = 'block';
     const spese = Math.round(v * 0.025) + 3000;
     document.getElementById('preview_valore_text').innerHTML =
-      `Per una casa da <strong>${fmtEuro(v)}</strong>, considera circa <strong>${fmtEuro(spese)}</strong> di spese accessorie 
+      `Per una casa da <strong>${fmtEuro(v)}</strong>, considera circa <strong>${fmtEuro(spese)}</strong> di spese accessorie
       (notaio, imposte, agenzia). Il totale da avere disponibile è circa <strong>${fmtEuro(v + spese)}</strong>.`;
   } else {
     preview.style.display = 'none';
@@ -1464,7 +1465,7 @@ function renderAcconto(wrap) {
         <div class="concept-label">📊 Come si divide</div>
         <div class="concept-text" id="preview_acconto_text"></div>
       </div>
-      <button class="btn-next" id="btn_acconto" onclick="saveAcconto()" disabled>Continua →</button>
+      <button class="btn-next" id="btn_acconto" onclick="saveAcconto()" disabled>Continua: ${titoloProssimaSezione('acconto')} →</button>
     </div>`;
 
 }
@@ -1556,10 +1557,10 @@ function renderLTV(wrap) {
       <div class="concept">
         <div class="concept-label">💡 Cos'è il Loan-to-Value (LTV)</div>
         <div class="concept-text">
-          LTV significa letteralmente "rapporto prestito-valore". 
+          LTV significa letteralmente "rapporto prestito-valore".
           Si calcola così: <strong>mutuo ÷ valore casa × 100</strong>.<br><br>
           Nel tuo caso: <strong>${fmtEuro(mutuo)} ÷ ${fmtEuro(state.valore_immobile)} = ${fmt(ltv,1)}%</strong><br><br>
-          Più il tuo LTV è basso, più la banca ti considera un cliente affidabile — 
+          Più il tuo LTV è basso, più la banca ti considera un cliente affidabile —
           e spesso ti offre un <strong>tasso d'interesse più basso</strong>.
         </div>
       </div>
@@ -1579,11 +1580,10 @@ function renderLTV(wrap) {
         ltv <= 80 ? `<div class="warning"><div class="warning-label">📋 Nella norma</div><div class="warning-text">LTV dell'${fmt(ltv,1)}%: rientra nella norma. Alcune banche potrebbero richiedere un'assicurazione aggiuntiva sopra il 70%.</div></div>` :
         state.garanzia_consap ? `<div class="concept"><div class="concept-label">🏛️ LTV coperto dalla Garanzia Statale</div><div class="concept-text">LTV dell'${fmt(ltv,1)}%: sopra l'80% le banche di solito richiedono una copertura aggiuntiva. Hai indicato di rientrare nella Garanzia Statale prima casa (Consap), che copre proprio questa parte del mutuo verso la banca. Restano da verificare i requisiti di accesso e la sostenibilità della rata rispetto al reddito.</div></div>` :
         `<div class="warning"><div class="warning-label">⚠️ LTV elevato</div><div class="warning-text">LTV dell'${fmt(ltv,1)}%: sopra l'80% poche banche finanziano senza garanzie aggiuntive. Un acconto più alto ridurrebbe l'LTV.</div></div>`}
-      <button class="btn-next" onclick="nextStep()">Capito, continua →</button>
+      <button class="btn-next" onclick="nextStep()">Continua: ${titoloProssimaSezione('ltv_spiegazione')} →</button>
     </div>`;
 }
 
-// ─── INTESTATARI (età, numero di intestatari, reddito) ─────────────────────
 function renderIntestatari(wrap) {
   wrap.innerHTML += `
     <div class="step-label">Chi richiede il mutuo</div>
@@ -1671,7 +1671,7 @@ function renderIntestatari(wrap) {
       </div>
       <div id="preview_reddito"></div>
 
-      <button class="btn-next" id="btn_continua_intestatari" onclick="saveIntestatari()" disabled>Continua →</button>
+      <button class="btn-next" id="btn_continua_intestatari" onclick="saveIntestatari()" disabled>Continua: ${titoloProssimaSezione('intestatari')} →</button>
     </div>`;
 }
 
@@ -1689,7 +1689,7 @@ function updateEtaPreview() {
     <div class="concept" style="border-color:${colore}; background: ${durataMax >= 25 ? 'var(--verde-light)' : 'var(--arancio-light)'}">
       <div class="concept-label" style="color:${coloreLabel}">📅 Il tuo orizzonte temporale</div>
       <div class="concept-text" style="color: ${durataMax >= 25 ? '#2d5a47' : '#7a4020'}">
-        Con ${eta} anni, puoi chiedere un mutuo di <strong>massimo ${durataMax} anni</strong> 
+        Con ${eta} anni, puoi chiedere un mutuo di <strong>massimo ${durataMax} anni</strong>
         (fino ai tuoi ${etaFine} anni, limite banca 80).<br>
         ${durataMax < 10 ? '⚠️ La durata massima è molto ridotta: la rata sarà necessariamente alta.' :
           durataMax < 20 ? 'Hai una buona flessibilità, ma con qualche vincolo sulla durata.' :
@@ -1726,11 +1726,12 @@ function selectCointestazione(valore, el) {
     const inpEta2 = document.getElementById('inp_eta2');
     const inpRed2 = document.getElementById('inp_reddito2');
     inpEta2.addEventListener('input', () => { updateCointestazionePreview(); sincronizzaBtnContinuaIntestatari(); });
-    inpRed2.addEventListener('input', () => { updateCointestazionePreview(); sincronizzaBtnContinuaIntestatari(); });
+    inpRed2.addEventListener('input', () => { updateCointestazionePreview(); updateRedditoPreview(); sincronizzaBtnContinuaIntestatari(); });
     updateCointestazionePreview();
   } else {
     fieldsBox.innerHTML = '';
   }
+  updateRedditoPreview();
   sincronizzaBtnContinuaIntestatari();
 }
 
@@ -1747,14 +1748,13 @@ function updateCointestazionePreview() {
     <div class="concept">
       <div class="concept-label">📅 Vincolo di durata della coppia</div>
       <div class="concept-text">
-        Tra ${state.eta} e ${eta2} anni, l'età più vincolante è quella di <strong>${chiEPiuAnziano}</strong> (${etaVincolante} anni). 
-        La durata massima del mutuo scende quindi a <strong>${durataMax} anni</strong> 
+        Tra ${state.eta} e ${eta2} anni, l'età più vincolante è quella di <strong>${chiEPiuAnziano}</strong> (${etaVincolante} anni).
+        La durata massima del mutuo scende quindi a <strong>${durataMax} anni</strong>
         (rispetto a ${80 - state.eta} anni se fossi da solo).
       </div>
     </div>`;
 }
 
-// Valida e salva età, numero di intestatari (e dati del cointestatario). Non avanza lo step.
 function salvaAnagrafica() {
   const eta = parseInt(document.getElementById('inp_eta')?.value);
   if (!eta || eta < 18 || eta > 74) {
@@ -1787,7 +1787,6 @@ function renderDurata(wrap) {
   const etaVincolante = getEtaVincolante();
   const durataMax = etaVincolante ? Math.min(30, ETA_MAX - etaVincolante) : 30;
   const durataMin = 5;
-  // Snap durata corrente al max consentito
   if (state.durata > durataMax) state.durata = durataMax;
 
   const rata_ref1 = calcRata(getMutuo(), 3.5, Math.min(20, durataMax));
@@ -1802,22 +1801,22 @@ function renderDurata(wrap) {
       ${etaVincolante ? `<div class="warning">
         <div class="warning-label">📅 Vincolo età${state.cointestato ? ' (coppia)' : ''}</div>
         <div class="warning-text">
-          ${state.cointestato ? `L'intestatario più anziano ha ${etaVincolante} anni.` : `Hai ${etaVincolante} anni.`} 
-          Le banche richiedono che il mutuo sia estinto entro i ${ETA_MAX} anni: 
-          puoi scegliere una durata <strong>massima di ${durataMax} anni</strong> 
+          ${state.cointestato ? `L'intestatario più anziano ha ${etaVincolante} anni.` : `Hai ${etaVincolante} anni.`}
+          Le banche richiedono che il mutuo sia estinto entro i ${ETA_MAX} anni:
+          puoi scegliere una durata <strong>massima di ${durataMax} anni</strong>
           (finireste a ${etaVincolante + durataMax} anni).
         </div>
       </div>` : ''}
       <div class="concept">
         <div class="concept-label">💡 Durata e rata: il compromesso</div>
         <div class="concept-text">
-          Durata più lunga = <strong>rata più bassa</strong> ogni mese, 
+          Durata più lunga = <strong>rata più bassa</strong> ogni mese,
           ma <strong>più interessi in totale</strong>.<br>
-          Durata più corta = <strong>rata più alta</strong> ogni mese, 
+          Durata più corta = <strong>rata più alta</strong> ogni mese,
           ma <strong>meno interessi totali</strong> e finisci prima.<br><br>
           Con il tuo mutuo di ${fmtEuro(getMutuo())} al 3,5%:<br>
-          ${durataMax >= 20 ? `· 20 anni → rata circa <strong>${fmtEuro(rata_ref1, 0)}/mese</strong><br>` : ''}
-          · ${durataMax} anni → rata circa <strong>${fmtEuro(rata_ref2, 0)}/mese</strong>
+          ${durataMax >= 20 ? `· 20 anni → rata circa <strong>${fmtEuro(rata_ref1, 0)} al mese</strong><br>` : ''}
+          · ${durataMax} anni → rata circa <strong>${fmtEuro(rata_ref2, 0)} al mese</strong>
         </div>
       </div>
       <div class="input-group">
@@ -1838,7 +1837,7 @@ function renderDurata(wrap) {
         <div class="concept-label">📊 Con questa durata</div>
         <div class="concept-text" id="preview_durata_text"></div>
       </div>
-      <button class="btn-next" onclick="saveDurata()">Continua →</button>
+      <button class="btn-next" onclick="saveDurata()">Continua: ${titoloProssimaSezione('durata')} →</button>
     </div>`;
 
 }
@@ -1857,7 +1856,7 @@ function updateDurata(val) {
   if (pt) {
     pt.innerHTML = `Rata mensile stimata: <strong>${fmtEuro(rata, 0)}</strong><br>
     Totale restituito: <strong>${fmtEuro(totale, 0)}</strong><br>
-    Di cui interessi: <strong>${fmtEuro(interessi, 0)}</strong> 
+    Di cui interessi: <strong>${fmtEuro(interessi, 0)}</strong>
     (<span style="color: ${interessi/getMutuo() > 0.5 ? 'var(--arancio-label)' : 'var(--verde-label)'}">${fmt(interessi/getMutuo()*100, 0)}% del capitale</span>)
     ${etaVincolante ? `<br>Finireste di pagare a <strong>${etaVincolante + state.durata} anni</strong>` : ''}`;
   }
@@ -1876,9 +1875,9 @@ function renderTipoTasso(wrap) {
       <div class="concept">
         <div class="concept-label">💡 Tasso d'interesse: la base</div>
         <div class="concept-text">
-          Il tasso è la percentuale che la banca ti addebita ogni anno sul debito residuo. 
-          Se hai un mutuo da <strong>200.000€</strong> al <strong>3%</strong>, 
-          il primo anno paghi circa <strong>6.000€ di interessi</strong> (500€ al mese), 
+          Il tasso è la percentuale che la banca ti addebita ogni anno sul debito residuo.
+          Se hai un mutuo da <strong>200.000€</strong> al <strong>3%</strong>,
+          il primo anno paghi circa <strong>6.000€ di interessi</strong> (500€ al mese),
           che si riducono man mano che rimborsi il capitale.
         </div>
       </div>
@@ -1897,7 +1896,7 @@ function renderTipoTasso(wrap) {
         </button>
       </div>
       <div id="tasso_spiegazione"></div>
-      <button class="btn-next" id="btn_tasso" onclick="saveTasso()" ${!state.tipo_tasso ? 'disabled' : ''}>Continua →</button>
+      <button class="btn-next" id="btn_tasso" onclick="saveTasso()" ${!state.tipo_tasso ? 'disabled' : ''}>Continua: ${titoloProssimaSezione('tipo_tasso')} →</button>
     </div>`;
 }
 
@@ -1905,7 +1904,9 @@ function selectTasso(tipo, el) {
   state.tipo_tasso = tipo;
   document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
   if (el) el.classList.add('selected');
-  document.getElementById('btn_tasso').disabled = false;
+  const btnTasso = document.getElementById('btn_tasso');
+  btnTasso.disabled = false;
+  btnTasso.textContent = `Continua: ${titoloProssimaSezione('tipo_tasso')} →`;
 
   const box = document.getElementById('tasso_spiegazione');
   if (tipo === 'fisso') {
@@ -1932,9 +1933,9 @@ function renderTassoDettaglio(wrap) {
         <div class="concept">
           <div class="concept-label">💡 Tasso nominale vs TAEG</div>
           <div class="concept-text">
-            Il tasso nominale (TAN) è la percentuale di interessi puri. 
-            Il <strong>TAEG</strong> (Tasso Annuo Effettivo Globale) include anche tutte le spese aggiuntive: 
-            assicurazione, spese di istruttoria, spese di perizia. 
+            Il tasso nominale (TAN) è la percentuale di interessi puri.
+            Il <strong>TAEG</strong> (Tasso Annuo Effettivo Globale) include anche tutte le spese aggiuntive:
+            assicurazione, spese di istruttoria, spese di perizia.
             Quando confronti due mutui, <strong>confronta sempre il TAEG, non il TAN</strong>.
           </div>
         </div>
@@ -1948,7 +1949,7 @@ function renderTassoDettaglio(wrap) {
           </div>
         </div>
         <div class="concept" id="preview_tasso_fisso"></div>
-        <button class="btn-next" id="btn_tasso_fisso" onclick="saveTassoFisso()" disabled>Continua →</button>
+        <button class="btn-next" id="btn_tasso_fisso" onclick="saveTassoFisso()" disabled>Continua: ${titoloProssimaSezione('tasso_dettaglio')} →</button>
       </div>`;
   } else {
     wrap.innerHTML += `
@@ -1959,10 +1960,10 @@ function renderTassoDettaglio(wrap) {
         <div class="concept">
           <div class="concept-label">💡 Euribor: cos'è davvero</div>
           <div class="concept-text">
-            L'<strong>Euribor</strong> (Euro Interbank Offered Rate) è il tasso a cui le banche europee 
-            si prestano denaro tra loro. È fissato ogni giorno e dipende dalle decisioni della 
-            <strong>Banca Centrale Europea (BCE)</strong>. 
-            Quando la BCE alza i tassi per frenare l'inflazione, l'Euribor sale — 
+            L'<strong>Euribor</strong> (Euro Interbank Offered Rate) è il tasso a cui le banche europee
+            si prestano denaro tra loro. È fissato ogni giorno e dipende dalle decisioni della
+            <strong>Banca Centrale Europea (BCE)</strong>.
+            Quando la BCE alza i tassi per frenare l'inflazione, l'Euribor sale —
             e la tua rata variabile sale con lui.
           </div>
         </div>
@@ -1985,7 +1986,7 @@ function renderTassoDettaglio(wrap) {
           </div>
         </div>
         <div class="concept" id="preview_variabile"></div>
-        <button class="btn-next" id="btn_tasso_variabile" onclick="saveTassoVariabile()" disabled>Continua →</button>
+        <button class="btn-next" id="btn_tasso_variabile" onclick="saveTassoVariabile()" disabled>Continua: ${titoloProssimaSezione('tasso_dettaglio')} →</button>
       </div>`;
   }
 }
@@ -2100,16 +2101,9 @@ function renderRiepilogo(wrap) {
         </div>
       </div>
     </div>
-    <button class="btn-next" onclick="nextStep()">Vedi il confronto →</button>`;
-
-  disegnaGraficoRata(datiPeriodi);
+    <button class="btn-next" onclick="nextStep()">Continua: ${titoloProssimaSezione('riepilogo')} →</button>`;
 }
 
-// Divide il piano di ammortamento in un numero ridotto di periodi (max 6) per
-// riepilogo e grafico: per ciascun periodo calcola i totali annui di capitale
-// e interessi, la media mensile all'interno del periodo, e il debito residuo
-// alla fine del periodo. Stessa logica di calcolo rata/interesse mensile del
-// resto del simulatore (vedi calcRata), qui solo aggregata per periodo.
 function calcolaDatiAmmortamentoPeriodi(capitale, tasso_annuo, anni) {
   const n = anni * 12;
   const r = tasso_annuo / 100 / 12;
@@ -2132,7 +2126,7 @@ function calcolaDatiAmmortamentoPeriodi(capitale, tasso_annuo, anni) {
       s -= cap_m;
     }
     dataPoints.push({
-      label: `Anno ${from / 12 + 1}`,
+      label: `Anno ${Math.floor(from / 12) + 1}`,
       mesi,
       cap: cap_period,
       int: int_period,
@@ -2223,9 +2217,6 @@ function disegnaGraficoRata(dataPoints) {
   });
 }
 
-// Il canvas non reagisce da solo al cambio di tema (i colori delle barre sono
-// stringhe già risolte al momento del disegno): quando si cambia tema mentre
-// il grafico è visibile, ne aggiorniamo i colori senza ricrearlo da zero.
 function aggiornaTemaGraficoRata() {
   if (!chartRataInstance) return;
   chartRataInstance.data.datasets[0].backgroundColor = coloreCSS('--blu-testo');
@@ -2241,7 +2232,6 @@ function aggiornaTemaGraficoRata() {
   chartRataInstance.update('none');
 }
 
-// ─── PUNTEGGIO DI SALUTE DEL MUTUO ──────────────────────────────────────────
 function calcolaPunteggioSalute() {
   const mutuo = getMutuo();
   const ltv = getLTV();
@@ -2250,14 +2240,12 @@ function calcolaPunteggioSalute() {
   const redditoTot = getRedditoTotale();
   const etaVinc = getEtaVincolante();
 
-  // Pilastro 1: LTV (0-25 pt)
   let pLTV, pLTVdesc;
   if (ltv <= 50) { pLTV = 25; pLTVdesc = 'eccellente'; }
   else if (ltv <= 70) { pLTV = 20; pLTVdesc = 'molto buono'; }
   else if (ltv <= 80) { pLTV = 12; pLTVdesc = 'nella norma'; }
   else { pLTV = 4; pLTVdesc = state.garanzia_consap ? 'elevato, coperto dalla Garanzia Statale Consap' : 'elevato'; }
 
-  // Pilastro 2: Rata/Reddito (0-30 pt) — 15/30 neutro se dato mancante
   let pRedd, pReddDesc, reddMancante = !redditoTot;
   if (reddMancante) { pRedd = 15; pReddDesc = 'dato non inserito'; }
   else {
@@ -2268,7 +2256,6 @@ function calcolaPunteggioSalute() {
     else { pRedd = 3; pReddDesc = 'a rischio'; }
   }
 
-  // Pilastro 3: Margine età (0-25 pt) — 15/25 neutro se età mancante
   let pEta, pEtaDesc, etaMancante = !etaVinc;
   if (etaMancante) { pEta = 15; pEtaDesc = 'dato non inserito'; }
   else {
@@ -2280,7 +2267,6 @@ function calcolaPunteggioSalute() {
     else { pEta = 5; pEtaDesc = 'al limite massimo'; }
   }
 
-  // Pilastro 4: Resilienza al rialzo dei tassi (0-20 pt) — stress test +2 punti se variabile
   let pStress, pStressDesc;
   if (reddMancante) { pStress = 10; pStressDesc = 'dato non inserito'; }
   else {
@@ -2299,7 +2285,7 @@ function calcolaPunteggioSalute() {
   if (totale >= 80) { verdetto = 'Profilo solido'; colore = 'var(--verde-label)'; bg = 'var(--verde-light)'; }
   else if (totale >= 60) { verdetto = 'Profilo nella norma'; colore = 'var(--blu-verdict)'; bg = '#eaf2fb'; }
   else if (totale >= 40) { verdetto = 'Profilo da rafforzare'; colore = 'var(--arancio-label)'; bg = 'var(--arancio-light)'; }
-  else { verdetto = 'Profilo fragile'; colore = '#c0392b'; bg = 'var(--rosso-light)'; }
+  else { verdetto = 'Profilo fragile'; colore = 'var(--rosso)'; bg = 'var(--rosso-light)'; }
 
   return {
     totale, verdetto, colore, bg,
@@ -2313,7 +2299,6 @@ function calcolaPunteggioSalute() {
 }
 
 function suggerimentoMiglioramento(score) {
-  // Trova il pilastro più debole (in proporzione al suo massimo) e suggerisce un'azione concreta
   const pesati = score.pillars.map(p => ({...p, ratio: p.punti / p.max}));
   pesati.sort((a,b) => a.ratio - b.ratio);
   const debole = pesati[0];
@@ -2353,14 +2338,12 @@ function renderPunteggioSalute(wrap) {
   const score = calcolaPunteggioSalute();
   const suggerimento = suggerimentoMiglioramento(score);
 
-  // Angolo della lancetta: da -90° (0 punti) a +90° (100 punti) su un semicerchio
-  const angolo = -90 + (score.totale / 100) * 180;
+  const angolo = -180 + (score.totale / 100) * 180;
   const rad = angolo * Math.PI / 180;
   const cx = 140, cy = 130, r = 100;
   const needleX = cx + r * 0.8 * Math.cos(rad);
   const needleY = cy + r * 0.8 * Math.sin(rad);
 
-  // Arco di sfondo colorato a segmenti (rosso-arancio-blu-verde)
   function arcPath(startDeg, endDeg, radius) {
     const s = (startDeg) * Math.PI/180, e = (endDeg) * Math.PI/180;
     const x1 = cx + radius*Math.cos(s), y1 = cy + radius*Math.sin(s);
@@ -2375,10 +2358,10 @@ function renderPunteggioSalute(wrap) {
       <div class="card-hint">Un punteggio che combina LTV, sostenibilità della rata, margine sull'età e resistenza a un aumento dei tassi. Non è un giudizio della banca: è una sintesi per orientarti.</div>
       <div class="gauge-wrap">
         <svg class="gauge-svg" viewBox="0 0 280 150">
-          <path d="${arcPath(-90,-45,100)}" stroke="#c0392b" stroke-width="16" fill="none" stroke-linecap="round" transform="translate(0,0)" />
-          <path d="${arcPath(-45,0,100)}" stroke="#e8834a" stroke-width="16" fill="none" stroke-linecap="round" />
-          <path d="${arcPath(0,45,100)}" stroke="#4a80c4" stroke-width="16" fill="none" stroke-linecap="round" />
-          <path d="${arcPath(45,90,100)}" stroke="#4a9b7f" stroke-width="16" fill="none" stroke-linecap="round" />
+          <path d="${arcPath(-180,-135,100)}" stroke="var(--rosso)" stroke-width="16" fill="none" stroke-linecap="round" />
+          <path d="${arcPath(-135,-90,100)}" stroke="var(--arancio)" stroke-width="16" fill="none" stroke-linecap="round" />
+          <path d="${arcPath(-90,-45,100)}" stroke="var(--blu-accento)" stroke-width="16" fill="none" stroke-linecap="round" />
+          <path d="${arcPath(-45,0,100)}" stroke="var(--verde)" stroke-width="16" fill="none" stroke-linecap="round" />
           <line x1="${cx}" y1="${cy}" x2="${needleX.toFixed(1)}" y2="${needleY.toFixed(1)}" stroke="var(--blu)" stroke-width="4" stroke-linecap="round"/>
           <circle cx="${cx}" cy="${cy}" r="7" fill="var(--blu)"/>
         </svg>
@@ -2389,8 +2372,8 @@ function renderPunteggioSalute(wrap) {
       <div class="pillar-list">
         ${score.pillars.map(p => {
           const pct = Math.round(p.punti/p.max*100);
-          const colore = pct >= 80 ? 'var(--verde)' : pct >= 55 ? '#4a80c4' : pct >= 30 ? 'var(--arancio)' : '#c0392b';
-          const coloreTesto = pct >= 80 ? 'var(--verde-label)' : pct >= 55 ? 'var(--blu-verdict)' : pct >= 30 ? 'var(--arancio-label)' : '#c0392b';
+          const colore = pct >= 80 ? 'var(--verde)' : pct >= 55 ? 'var(--blu-accento)' : pct >= 30 ? 'var(--arancio)' : 'var(--rosso)';
+          const coloreTesto = pct >= 80 ? 'var(--verde-label)' : pct >= 55 ? 'var(--blu-verdict)' : pct >= 30 ? 'var(--arancio-label)' : 'var(--rosso)';
           return `<div class="pillar-row">
             <div class="pillar-icon">${p.icona}</div>
             <div class="pillar-info">
@@ -2409,7 +2392,7 @@ function renderPunteggioSalute(wrap) {
         <div class="warning-label">⚠️ Attenzione</div>
         <div class="warning-text">Questo punteggio è un modello educativo semplificato, non l'algoritmo reale di nessuna banca. Ogni istituto valuta con criteri propri, spesso più complessi.</div>
       </div>
-      <button class="btn-next" onclick="nextStep()">Continua →</button>
+      <button class="btn-next" onclick="nextStep()">Continua: ${titoloProssimaSezione('punteggio_salute')} →</button>
     </div>`;
 }
 
@@ -2436,7 +2419,7 @@ function renderConfronto(wrap) {
     </div>
     <div class="comparison">
       <div class="comp-col-header">
-        <div style="flex:1;font-size:12px;font-weight:600;color:var(--testo-soft)">Voce</div>
+        <div style="font-size:12px;font-weight:600;color:var(--testo-soft)">Voce</div>
         <div class="col-h a">🔒 Fisso</div>
         <div class="col-h b">📈 Variabile</div>
       </div>
@@ -2468,16 +2451,19 @@ function renderConfronto(wrap) {
         <div class="comp-b" style="color:var(--arancio-label)">⚠️ No</div>
       </div>
     </div>
+    <div class="chart-axis-hint">
+      Il tasso variabile (${fmt(tassoV,2)}%) è calcolato come Euribor + spread con i valori che hai indicato — Euribor ${fmt(state.euribor,2)}% + spread ${fmt(state.spread,2)}% — <strong>presi a oggi, ${dataOggiIT()}</strong>. L'Euribor cambia nel tempo, quindi anche questo tasso e la rata variabile cambieranno di conseguenza; il tasso fisso invece resta quello per tutta la durata del mutuo.
+    </div>
     <div class="card">
       <div class="concept">
         <div class="concept-label">💡 Come scegliere davvero</div>
         <div class="concept-text">
           Non esiste la scelta giusta in assoluto. Dipende da:<br><br>
-          · <strong>Quanto rischio puoi tollerare?</strong> Se un aumento della rata di 200-300€/mese 
+          · <strong>Quanto rischio puoi tollerare?</strong> Se un aumento della rata di 200-300€ al mese
           metterebbe in difficoltà il tuo bilancio, il fisso è più prudente.<br><br>
-          · <strong>Quanto durerà il mutuo?</strong> Su orizzonti lunghi (25-30 anni), 
+          · <strong>Quanto durerà il mutuo?</strong> Su orizzonti lunghi (25-30 anni),
           i tassi variabili tendono a bilanciare salite e discese.<br><br>
-          · <strong>Dove sono i tassi oggi?</strong> Con tassi alti conviene spesso aspettare o scegliere il variabile 
+          · <strong>Dove sono i tassi oggi?</strong> Con tassi alti conviene spesso aspettare o scegliere il variabile
           scommettendo su una discesa. Con tassi bassi, il fisso "blocca" la convenienza.
         </div>
       </div>
@@ -2486,14 +2472,14 @@ function renderConfronto(wrap) {
         <div class="warning-text">Se l'Euribor salisse di 2 punti, la tua rata variabile passerebbe da <strong>${fmtEuro(rataV,0)}</strong> a circa <strong>${fmtEuro(calcRata(mutuo, tassoV+2, durata),0)}</strong> al mese. Sei in grado di sostenere questo aumento?</div>
       </div>
     </div>
-    <button class="btn-next" onclick="nextStep()">Esplora le combinazioni →</button>`;
+    <button class="btn-next" onclick="nextStep()">Continua: ${titoloProssimaSezione('confronto')} →</button>`;
 }
 
 function updateRedditoPreview() {
   const reddito1 = parseFloat(document.getElementById('inp_reddito')?.value);
   const box = document.getElementById('preview_reddito');
   if (!box || !reddito1 || reddito1 < 500) { if(box) box.innerHTML=''; return; }
-  const reddito2 = state.cointestato ? (state.reddito2 || 0) : 0;
+  const reddito2 = state.cointestato ? (parseFloat(document.getElementById('inp_reddito2')?.value) || 0) : 0;
   const reddito = reddito1 + reddito2;
   const mutuo = getMutuo();
   const tasso = state.tasso_fisso || 3.5;
@@ -2511,11 +2497,11 @@ function updateRedditoPreview() {
   box.innerHTML = `
     ${state.cointestato ? `<div class="concept" style="margin-bottom:8px">
       <div class="concept-label">👥 Reddito complessivo della coppia</div>
-      <div class="concept-text">${fmtEuro(reddito1,0)} (tuo) + ${fmtEuro(reddito2,0)} (cointestatario) = <strong>${fmtEuro(reddito,0)}/mese</strong></div>
+      <div class="concept-text">${fmtEuro(reddito1,0)} (tuo) + ${fmtEuro(reddito2,0)} (cointestatario) = <strong>${fmtEuro(reddito,0)} al mese</strong></div>
     </div>` : ''}
     <div class="meter-wrap">
       <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;font-weight:600;color:var(--testo-soft)">
-        <span>Rata stimata: <strong style="color:var(--blu-testo)">${fmtEuro(rata,0)}/mese</strong></span>
+        <span>Rata mensile stimata: <strong style="color:var(--blu-testo)">${fmtEuro(rata,0)} al mese</strong></span>
         <span style="color:${coloreTesto};font-weight:800">${fmt(pct,1)}% del reddito</span>
       </div>
       <div class="meter-track">
@@ -2527,7 +2513,7 @@ function updateRedditoPreview() {
     </div>
     <div class="concept" style="border-color:${colore};background:${bg}">
       <div class="concept-text" style="color:${pct<=30?'#2d5a47':pct<=35?'#7a4020':'#7a1010'}">${testo}<br><br>
-      Per stare sotto il 30% con il tuo reddito, la rata massima ideale è <strong>${fmtEuro(soglia30,0)}/mese</strong>.<br>
+      Per stare sotto il 30% con il tuo reddito, la rata massima ideale è <strong>${fmtEuro(soglia30,0)} al mese</strong>.<br>
       Questo corrisponde a un mutuo di circa <strong>${fmtEuro(calcMutuoDaRata(soglia30, tasso, state.durata),0)}</strong> alle condizioni attuali.</div>
     </div>`;
 }
@@ -2547,8 +2533,6 @@ function saveIntestatari() {
   nextStep();
 }
 
-// Verifica se tutti i campi obbligatori dello step "Intestatari" sono popolati
-// correttamente, e abilita/disabilita di conseguenza il pulsante Continua.
 function sincronizzaBtnContinuaIntestatari() {
   const btn = document.getElementById('btn_continua_intestatari');
   if (!btn) return;
@@ -2570,7 +2554,6 @@ function sincronizzaBtnContinuaIntestatari() {
   btn.disabled = !completo;
 }
 
-// ─── COSTI INIZIALI ─────────────────────────────────────────────────────────
 function renderCostiIniziali(wrap) {
   wrap.innerHTML += `
     <div class="step-label">Costi iniziali — Cosa devi avere in tasca</div>
@@ -2649,7 +2632,7 @@ function renderCostiIniziali(wrap) {
         <div class="totale-value" id="totale_costi_val">—</div>
       </div>
       <div id="preview_costi"></div>
-      <button class="btn-next" id="btn_continua_costi" onclick="saveCosti()" disabled>Continua →</button>
+      <button class="btn-next" id="btn_continua_costi" onclick="saveCosti()" disabled>Continua: ${titoloProssimaSezione('costi_iniziali')} →</button>
     </div>`;
 }
 
@@ -2698,7 +2681,6 @@ function saveCosti() {
   nextStep();
 }
 
-// ─── SCENARI VITA ───────────────────────────────────────────────────────────
 function renderScenariVita(wrap) {
   const mutuo = getMutuo();
   const tasso = state.tipo_tasso === 'variabile' ? getTassoVariabile() : state.tasso_fisso;
@@ -2718,7 +2700,6 @@ function renderScenariVita(wrap) {
     </div>`;
   }
 
-  // Calcoli scenari
   const saldoResiduo5 = calcolaSaldoResiduo(mutuo, tasso, state.durata, 5);
   const penaleFisso = state.tipo_tasso === 'fisso' ? Math.round(saldoResiduo5 * 0.015) : 0;
 
@@ -2758,7 +2739,7 @@ function renderScenariVita(wrap) {
         <li>Gli eredi possono continuare a pagare le rate o vendere l'immobile per estinguere il debito.</li>
         <li><strong>Assicurazione vita sul mutuo</strong>: molte banche la richiedono o la consigliano. Copre il debito residuo in caso di decesso o invalidità permanente. Con il tuo mutuo, un premio indicativo è circa <strong>${fmtEuro(Math.round(mutuo*0.002),0)}/anno</strong>.</li>
       </ul>`)}
-    <button class="btn-next" onclick="nextStep()" style="margin-top:8px">Continua →</button>`;
+    <button class="btn-next" onclick="nextStep()" style="margin-top:8px">Continua: ${titoloProssimaSezione('scenari_vita')} →</button>`;
 }
 
 function calcolaSaldoResiduo(capitale, tasso_annuo, anni_totali, anni_trascorsi) {
@@ -2837,10 +2818,10 @@ function renderTimeline(wrap) {
       <div class="concept">
         <div class="concept-label">💡 Estinzione anticipata</div>
         <div class="concept-text">
-          Puoi restituire tutto il mutuo prima della scadenza. La banca può chiederti una <strong>penale di estinzione</strong>, 
-          ma per i mutui a tasso variabile è vietata per legge (decreto Bersani). 
+          Puoi restituire tutto il mutuo prima della scadenza. La banca può chiederti una <strong>penale di estinzione</strong>,
+          ma per i mutui a tasso variabile è vietata per legge (decreto Bersani).
           Per i fissi è ammessa ma limitata all'1–1,5% del capitale residuo.
-          Conviene estinguere anticipatamente? Dipende dal tasso: se hai un mutuo al 2% 
+          Conviene estinguere anticipatamente? Dipende dal tasso: se hai un mutuo al 2%
           e potresti investire quei soldi al 4%, forse no.
         </div>
       </div>
@@ -2868,7 +2849,6 @@ function goBack() {
   render();
 }
 
-// ─── MODALITÀ SEMPLICE (accessibilità) ──────────────────────────────────────
 function toggleModoSemplice() {
   state.modoSemplice = !state.modoSemplice;
   render();
@@ -2881,11 +2861,9 @@ function applyModoSemplice() {
 
   if (!state.modoSemplice) return;
 
-  // Tronca a 2 righe i testi lunghi con un pulsante "Leggi tutto" per chi lo desidera
   const elementi = document.querySelectorAll('#mainContent .concept-text, #mainContent .warning-text, #mainContent .card-hint');
   elementi.forEach(el => {
     el.classList.add('truncabile');
-    // Forza un reflow per misurare correttamente scrollHeight vs clientHeight
     const overflow = el.scrollHeight > el.clientHeight + 2;
     if (overflow) {
       const btnLeggi = document.createElement('button');
@@ -2926,7 +2904,6 @@ function restart() {
 
 render();
 
-/* ===================== TEMA CHIARO/SCURO ===================== */
 function applyThemeButtonState() {
   const scuro = document.documentElement.getAttribute('data-theme') === 'dark';
   const btn = document.getElementById('themeBtn');
@@ -2948,15 +2925,11 @@ function toggleTema() {
   try { localStorage.setItem('tema', scuro ? 'chiaro' : 'scuro'); } catch (e) {}
   applyThemeButtonState();
   aggiornaTemaGraficoRata();
+  setProgress(state.step);
 }
 
 applyThemeButtonState();
 
-/* ===================== TRADUZIONE EN/DE ===================== */
-// Il simulatore genera il contenuto dinamicamente in italiano; usiamo il
-// motore di Google Translate solo come "traduttore automatico" pilotato
-// dai nostri pulsanti IT/EN/DE, senza mostrarne la UI e senza ricaricare
-// la pagina (per non perdere le risposte già inserite dall'utente).
 let currentLang = 'it';
 
 function googleTranslateElementInit() {
@@ -2967,9 +2940,6 @@ function googleTranslateElementInit() {
   }, 'google_translate_element');
 }
 
-// Google reimposta di tanto in tanto uno stile inline (top/margin) su
-// <html>/<body> per far spazio alla sua banner-bar: lo azzeriamo ogni volta
-// che prova a cambiarlo, così la barra non compare mai, nemmeno per un istante.
 function nascondiBannerGoogle() {
   [document.documentElement, document.body].forEach(el => {
     if (el.style.top && el.style.top !== '0px') el.style.top = '0px';
@@ -2987,8 +2957,6 @@ function setLanguage(lang, attempt) {
   const combo = document.querySelector('.goog-te-combo');
 
   if (!combo) {
-    // Il widget Google Translate si inizializza in modo asincrono: riproviamo
-    // per un po', poi rinunciamo silenziosamente (es. senza connessione).
     if (attempt < 20) {
       setTimeout(() => setLanguage(lang, attempt + 1), 250);
     }
